@@ -18,14 +18,12 @@ public class TodoItemController : Controller
 
         if (!ModelState.IsValid)
         {
-            /* return Ok("{\"error\": \"invalid state\"}"); */
             return BadRequest(ModelState);
         }
 
         var claimsIdentity = User.Identity as ClaimsIdentity;
         if (claimsIdentity == null)
         {
-            /* return Ok("{\"error\": \"null claim\"}"); */
             return BadRequest();
         }
 
@@ -34,7 +32,6 @@ public class TodoItemController : Controller
 
         if (userIdClaim == null)
         {
-            /* return Ok("{\"error\": \"null userid claim\"}"); */
             return BadRequest();
         }
 
@@ -42,7 +39,7 @@ public class TodoItemController : Controller
 
         todoItemAddDto.UserId = userIdValue;
         var todoItemManager = new TodoItemManager();
-        var itemId = todoItemManager.AddItem(todoItemAddDto);
+        todoItemAddDto.Id = todoItemManager.AddItem(todoItemAddDto);
         todoItemAddDto.UserId = null;
 
         var json = JsonSerializer.Serialize(todoItemAddDto);
