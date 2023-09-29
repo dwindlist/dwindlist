@@ -15,7 +15,6 @@ public class TodoItemController : Controller
     [HttpPost]
     public ActionResult Add(TodoItemAddDto todoItemAddDto)
     {
-
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
