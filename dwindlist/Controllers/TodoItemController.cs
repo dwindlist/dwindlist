@@ -15,16 +15,18 @@ public class TodoItemController : Controller
     [HttpPost]
     public ActionResult Add(TodoItemAddDto todoItemAddDto)
     {
+
         if (!ModelState.IsValid)
         {
+            /* return Ok("{\"error\": \"invalid state\"}"); */
             return BadRequest(ModelState);
         }
 
         var claimsIdentity = User.Identity as ClaimsIdentity;
         if (claimsIdentity == null)
         {
-            return Ok("{\"text\": \"null claim\"}");
-            /* return BadRequest(); */
+            /* return Ok("{\"error\": \"null claim\"}"); */
+            return BadRequest();
         }
 
         var userIdClaim = claimsIdentity.Claims
@@ -32,8 +34,8 @@ public class TodoItemController : Controller
 
         if (userIdClaim == null)
         {
-            return Ok("{\"text\": \"null userid claim\"}");
-            /* return BadRequest(); */
+            /* return Ok("{\"error\": \"null userid claim\"}"); */
+            return BadRequest();
         }
 
         var userIdValue = userIdClaim.Value;

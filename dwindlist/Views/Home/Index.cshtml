@@ -2,7 +2,49 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-danger" role="alert"></div>
+<div class="form-group">
+  <label for="newItem">New Item:</label>
+  <input type="text" class="form-control" id="newItem">
 </div>
+<button type="button" class="btn btn-primary" id="saveChanges">Save Changes</button>
+<div id="todo-list">
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        let newItem = $("#newItem")
+        $("#saveChanges").click(function () {
+            let userData = {
+                Label: newItem.val(),
+                ParentId: 0,
+                Status: 'i',
+            };
+
+            console.log(userData);
+
+            $.ajax({
+                type: "POST",
+                url: "/todoitem/add",
+                data: JSON.stringify(userData),
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    // Handle the API response as needed
+                    console.log("User updated successfully");
+                    console.log(JSON.parse(response))
+//                     $(".text-danger").empty();
+//                     $("#todo-list").append(`
+// ${response["Id"]}: ${response["Label"]}
+// `);
+                },
+                error: function (error) {
+                    // Handle API error
+                    console.error("Error updating user:", error);
+                    $(".text-danger").text("Failed to add")
+                }
+            });
+        });
+    });
+</script>
