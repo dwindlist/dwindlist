@@ -1,5 +1,8 @@
+using System.Net;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using dwindlist.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,11 +36,26 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseStatusCodePages(async context =>
+{
+    var request = context.HttpContext.Request;
+    var response = context.HttpContext.Response;
+
+    if (response.StatusCode == (int)HttpStatusCode.Unauthorized)
+
+    {
+        response.Redirect("/Identity/Account/Login");
+    }
+});
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(
+    name: "TodoItem",
+    pattern: "{controller=TodoItem}/{action=Index}/{id?}");
 app.MapRazorPages();
 
 app.Run();
