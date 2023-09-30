@@ -4,12 +4,16 @@
 <div class="container mt-4">
     @* <div class="row"> *@
         <!-- Right Column (Button to Add Checkboxes) -->
-        <div class="col-md-12">
-            <div class="button-container text-center mt-12 mb-12">
-                <button class="buttontext" id="addMainCheckbox">Add Main Checkbox</button>
-            </div>
+        <div class="text-danger" role="alert"></div>
+        <div class="form-group">
+            <label for="newItem">New Item:</label>
+            <input type="text" class="form-control" id="newItem">
         </div>
-        
+        <button type="button" class="btn btn-primary" id="saveChanges">Save Changes</button>
+
+        <div id="todo-list">
+        </div>
+
         <!-- Navigation Bar Column (Left) -->
         <div class="col-md-12">
             <div class="card text-center">
@@ -31,108 +35,52 @@
     @* </div> *@
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-    document.getElementById("addMainCheckbox").addEventListener("click", function () {
-        // Create a new main checkbox element
-        var mainCheckbox = createCheckbox("Main Checkbox");
+    $(document).ready(function () {
+        let newItem = $("#newItem")
+        $("#saveChanges").click(function () {
+            let userData = {
+                Label: newItem.val(),
+                ParentId: 0,
+                Status: 'i',
+            };
 
-        // Create a new input-group div for the main checkbox
-        var mainInputGroup = createInputGroup(mainCheckbox);
+            console.log(userData);
 
-        // Append the inputGroup below the button with some spacing
-        var buttonContainer = document.querySelector(".button-container");
-        buttonContainer.appendChild(mainInputGroup);
-
-        // Initialize an empty list of sub-checkboxes for the main checkbox
-        mainCheckbox.subCheckboxes = [];
+            $.ajax({
+                type: "POST",
+                url: "/todoitem/add",
+                data: JSON.stringify(userData),
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    // Handle the API response as needed
+                    console.log("Todo list item added successfully");
+                    response = JSON.parse(response);
+                    console.log(response);
+                    console.log(response["Label"]);
+                    $(".text-danger").empty();
+                    $("#todo-list").append(`
+<div class="input-group mb-3" style="width: 100%;">
+    <div class="input-group-prepend" style="width: 30px;">
+        <div class="input-group-text">
+            <input type="checkbox" aria-label="Main Checkbox">
+        </div>
+    </div>
+    <input type="text" disabled="true" class="form-control" aria-label="Text input with checkbox" style="width: calc(100% - 60px);" value="${response["Label"]}">
+    <button class="btn btn-sm btn-primary">Edit</button>
+    <button class="btn btn-sm btn-danger">Delete</button>
+    <button class="btn btn-sm btn-success">Add Sub-Checkbox</button>
+</div>
+`);
+                },
+                error: function (error) {
+                    // Handle API error
+                    console.error("Error adding todo list item:", error);
+                    $(".text-danger").text("An error occurred")
+                }
+            });
+        });
     });
-
-    function createCheckbox(ariaLabel) {
-        var checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.setAttribute("aria-label", ariaLabel);
-        return checkbox;
-    }
-
-    function createInputGroup(checkbox) {
-        // Create a new input element for text
-        var input = document.createElement("input");
-        input.type = "text";
-        input.className = "form-control";
-        input.setAttribute("aria-label", "Text input with checkbox");
-        input.style.width = "calc(100% - 60px)"; // Adjusted for both buttons
-
-        // Create an edit/save button
-        var editButton = createButton("Edit", "btn-primary", function () {
-            toggleEditing(input, editButton);
-        });
-
-        // Create a delete button
-        var deleteButton = createButton("Delete", "btn-danger", function () {
-            // Remove the entire inputGroup when the delete button is clicked
-            inputGroup.remove();
-        });
-
-        // Create an "Add Sub-Checkbox" button
-        var addSubCheckboxButton = createButton("Add Sub-Checkbox", "btn-success", function () {
-            // Create a new sub-checkbox element
-            var subCheckbox = createCheckbox("Sub-Checkbox");
-
-            // Create a new input-group div for the sub-checkbox
-            var subInputGroup = createInputGroup(subCheckbox);
-
-            // Append the subInputGroup below the mainInputGroup
-            mainInputGroup.appendChild(subInputGroup);
-
-            // Add the sub-checkbox to the list of sub-checkboxes associated with the main checkbox
-            checkbox.subCheckboxes.push(subCheckbox);
-        });
-
-        // Create a new input-group div for the checkbox
-        var inputGroup = document.createElement("div");
-        inputGroup.className = "input-group mb-3";
-        inputGroup.style.width = "100%";
-
-        // Create the prepend div for the checkbox
-        var prependDiv = document.createElement("div");
-        prependDiv.className = "input-group-prepend";
-        prependDiv.style.width = "30px";
-
-        // Create the input-group-text div for the checkbox
-        var textDiv = document.createElement("div");
-        textDiv.className = "input-group-text";
-
-        // Append the checkbox to the textDiv
-        textDiv.appendChild(checkbox);
-
-        // Append the text input, edit button, delete button, and add sub-checkbox button to the inputGroup
-        inputGroup.appendChild(prependDiv);
-        inputGroup.appendChild(input);
-        inputGroup.appendChild(editButton);
-        inputGroup.appendChild(deleteButton);
-        inputGroup.appendChild(addSubCheckboxButton);
-
-        // Append the textDiv to the prependDiv
-        prependDiv.appendChild(textDiv);
-
-        return inputGroup;
-    }
-
-    function createButton(text, className, clickHandler) {
-        var button = document.createElement("button");
-        button.className = "btn btn-sm " + className;
-        button.textContent = text;
-        button.addEventListener("click", clickHandler);
-        return button;
-    }
-
-    function toggleEditing(input, editButton) {
-        if (input.disabled) {
-            input.disabled = false; // Enable editing
-            editButton.textContent = "Save"; // Change button text to "Save"
-        } else {
-            input.disabled = true; // Disable editing
-            editButton.textContent = "Edit"; // Change button text to "Edit"
-        }
-    }
 </script>
