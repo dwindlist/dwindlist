@@ -13,7 +13,7 @@ public class TodoItemController : Controller
 {
     [Authorize]
     [HttpPost]
-    public ActionResult Add(TodoItemAddDto todoItemAddDto)
+    public ActionResult Add([FromBody] TodoItemAddDto todoItemAddDto)
     {
         if (!ModelState.IsValid)
         {
