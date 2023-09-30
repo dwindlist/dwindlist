@@ -13,10 +13,11 @@ public class TodoItemDBContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            // warning To protect potentially sensitive information in your connection string,
-            // you should move it out of source code.See http://go.microsoft.com/fwlink/?LinkId=723263
-            // for guidance on storing connection strings.
-            optionsBuilder.UseSqlServer("Server=(localdb)\\dwindlistdb;Database=dwindlist;Trusted_Connection=True;MultipleActiveResultSets=true");
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
+                .Build();
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         }
     }
 
