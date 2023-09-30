@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-
+﻿using dwindlist.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using dwindlist.Models;
+using System.Diagnostics;
 
 namespace dwindlist.Controllers;
 
