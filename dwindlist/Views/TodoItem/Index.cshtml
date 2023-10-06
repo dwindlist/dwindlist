@@ -1,0 +1,101 @@
+﻿@model dwindlist.Models.ViewModel.TodoList
+@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="container mt-4">
+    @* <div class="row"> *@
+        <!-- Right Column (Button to Add Checkboxes) -->
+        <div class="text-danger" role="alert"></div>
+        <div class="form-group">
+            <label for="newItem">New Item:</label>
+            <input type="text" class="form-control" id="newItem">
+        </div>
+        <button type="button" class="btn btn-primary" id="saveChanges">Save Changes</button>
+
+        <div id="todo-list">
+            @foreach(var item in Model.Items)
+            {
+            <div class="input-group mb-3" style="width: 100%;">
+                <div class="input-group-prepend" style="width: 30px;">
+                    <div class="input-group-text">
+                        <input type="checkbox" aria-label="Main Checkbox">
+                    </div>
+                </div>
+                <input type="text" disabled="true" class="form-control" aria-label="Text input with checkbox" style="width: calc(100% - 60px);" value="@item.Id: @item.Label">
+                <button class="btn btn-sm btn-primary">Edit</button>
+                <button class="btn btn-sm btn-danger">Delete</button>
+                <button class="btn btn-sm btn-success">Add Sub-Checkbox</button>
+            </div>
+            }
+        </div>
+
+        <!-- Navigation Bar Column (Left) -->
+        <div class="col-md-12">
+            <div class="card text-center">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">All</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Completed</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="#">Incomplete</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @* </div> *@
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        let newItem = $("#newItem")
+        $("#saveChanges").click(function () {
+            let userData = {
+                Label: newItem.val(),
+                ParentId: 0,
+                Status: 'i',
+            };
+
+            console.log(userData);
+
+            $.ajax({
+                type: "POST",
+                url: "/todoitem/add",
+                data: JSON.stringify(userData),
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    // Handle the API response as needed
+                    console.log("Todo list item added successfully");
+                    response = JSON.parse(response);
+                    console.log(response);
+                    console.log(response["Label"]);
+                    $(".text-danger").empty();
+                    $("#todo-list").append(`
+<div class="input-group mb-3" style="width: 100%;">
+    <div class="input-group-prepend" style="width: 30px;">
+        <div class="input-group-text">
+            <input type="checkbox" aria-label="Main Checkbox">
+        </div>
+    </div>
+    <input type="text" disabled="true" class="form-control" aria-label="Text input with checkbox" style="width: calc(100% - 60px);" value="${response["Label"]}">
+    <button class="btn btn-sm btn-primary">Edit</button>
+    <button class="btn btn-sm btn-danger">Delete</button>
+    <button class="btn btn-sm btn-success">Add Sub-Checkbox</button>
+</div>
+`);
+                },
+                error: function (error) {
+                    // Handle API error
+                    console.error("Error adding todo list item:", error);
+                    $(".text-danger").text("An error occurred")
+                }
+            });
+        });
+    });
+</script>

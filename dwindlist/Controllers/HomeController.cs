@@ -15,9 +15,9 @@ public class HomeController : Controller
     }
 
     [Authorize]
-    public IActionResult Index()
+    public ActionResult Index()
     {
-        return View();
+        return Redirect("/TodoItem/Index");
     }
 
     public IActionResult Privacy()
