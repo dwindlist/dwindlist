@@ -4,8 +4,6 @@ namespace dwindlist.Dtos;
 
 public class TodoItemAddDto
 {
-    public int? Id { get; set; }
-    public string? UserId { get; set; }
     [Required]
     [MaxLength(256), MinLength(1)]
     public string Label { get; set; }

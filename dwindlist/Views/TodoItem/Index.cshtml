@@ -2,16 +2,14 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-<button id="throwaway" value="testing">Click me!</button>
-
 <div class="container mt-4">
     <div class="row">
         <!-- Right Column (Button to Add Checkboxes) -->
         <div class="text-danger" role="alert" id="alert@(Model.RootId)"></div>
         <div class="form-group">
-            <label for="new-item@(Model.RootId)">New Item:</label>
-            <input type="text" class="form-control" id="new-item@(Model.RootId)">
-            <button type="button" class="btn btn-primary save-changes" id="save-changes@(Model.RootId)" value="@Model.RootId">Add Item</button>
+            <label for="new-item-label@(Model.RootId)">New Item:</label>
+            <input type="text" class="form-control" id="new-item-label@(Model.RootId)">
+            <button type="button" class="btn btn-primary add-item" id="add-item@(Model.RootId)" value="@Model.RootId">Add Item</button>
         </div>
 
         <div id="todo-list">
@@ -32,21 +30,22 @@
                 </div>
                 @if (item.Status == 'c')
                 {
-                <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" aria-label="Text input with checkbox" value="@item.Id: @item.Label">
+                <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
                 }
                 else
                 {
-                <input type="text" style="text-decoration: none;" disabled="true" class="form-control" aria-label="Text input with checkbox" value="@item.Id: @item.Label">
+                <input type="text" style="text-decoration: none;" disabled="true" class="form-control" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
                 }
-                <button class="btn btn-sm btn-success">Edit</button>
+                <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
+                <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
             </div>
                 <div class="col-md-11 float-end">
                     <div class="text-danger" role="alert" id="alert@(item.Id)"></div>
                     <div class="form-group">
-                        <label for="new-item@(item.Id)">New Item:</label>
-                        <input type="text" class="form-control" id="new-item@(item.Id)">
-                        <button type="button" class="btn btn-primary save-changes" id="save-changes@(item.Id)" value="@item.Id">Add Item</button>
+                        <label for="new-item-label@(item.Id)">New Item:</label>
+                        <input type="text" class="form-control" id="new-item-label@(item.Id)">
+                        <button type="button" class="btn btn-primary add-item" id="add-item@(item.Id)" value="@item.Id">Add Item</button>
                     </div>
                 @foreach(var subitem in item.Children)
                 {
@@ -65,13 +64,14 @@
                         </div>
                         @if (subitem.Status == 'c')
                         {
-                        <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" aria-label="Text input with checkbox" value="@subitem.Id: @subitem.Label">
+                        <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
                         }
                         else
                         {
-                        <input type="text" style="text-decoration: none;" disabled="true" class="form-control" aria-label="Text input with checkbox" value="@subitem.Id: @subitem.Label">
+                        <input type="text" style="text-decoration: none;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
                         }
-                        <button class="btn btn-sm btn-success">Edit</button>
+                        <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
+                        <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
                         <button class="btn btn-sm btn-danger">Delete</button>
                     </div>
                 }
@@ -110,13 +110,13 @@
             alert(testButton.val());
         });
 
-        let toggleStatus = $(".toggle-status")
-        toggleStatus.click(function() {
-            let thisElement = $(`#${$(this).attr("id")}`)
+        $(".toggle-status").click(function() {
+            let thisElement = $(`#${$(this).attr("id")}`);
             let thisId = $(thisElement).val();
+
             thisElement.prop("disabled", true);
-            // alert(thisId);
-            // return;
+            $(`#new-item-label${thisId}`).prop("disabled", true);
+
             $.ajax({
                 type: "PUT",
                 url: `/todoitem/toggle/${thisId}`,
@@ -129,18 +129,21 @@
                     // Handle API error
                     console.error("Error adding toggling todo list item:", error);
                     $(`#alert${thisId}`).text("An error occurred")
+                    window.location.reload();
                 }
             });
         });
 
-        let saveChanges = $(".save-changes");
-        saveChanges.click(function () {
-            let thisElement = $(`#${$(this).attr("id")}`)
+        $(".add-item").click(function () {
+            let thisElement = $(`#${$(this).attr("id")}`);
             let thisId = $(thisElement).val();
+
+            thisElement.prop("disabled", true);
+
             let userData = {
-                Label: $("#new-item" + thisId).val(),
+                Label: $(`#new-item-label${thisId}`).val(),
                 ParentId: thisId,
-                Status: 'i',
+                Status: 'i'
             };
 
             console.log(userData);
@@ -159,6 +162,48 @@
                     // Handle API error
                     console.error("Error adding todo list item:", error);
                     $(`#alert${thisId}`).text("An error occurred")
+                    window.location.reload();
+                }
+            });
+        });
+
+        $(".edit-item").click(function() {
+            let thisElement = $(`#${$(this).attr("id")}`);
+            let thisId = $(thisElement).val();
+
+            thisElement.prop("hidden", true);
+
+            $(`#save-item${thisId}`).prop("hidden", false);
+            $(`#edit-item-label${thisId}`).prop("disabled", false);
+        });
+
+        $(".save-item").click(function() {
+            let thisElement = $(`#${$(this).attr("id")}`)
+            let thisId = $(thisElement).val();
+
+            thisElement.prop("disabled", true);
+            thisLabel = $(`#edit-item-label${thisId}`);
+            thisLabel.prop("disabled", true);
+
+            let userData = {
+                Label: thisLabel.val()
+            };
+
+            $.ajax({
+                type: "PUT",
+                url: `/todoitem/updatelabel/${thisId}`,
+                data: JSON.stringify(userData),
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    // Handle the API response as needed
+                    console.log("Todo list item updated successfully");
+                    window.location.reload();
+                },
+                error: function (error) {
+                    // Handle API error
+                    console.error("Error updating todo list item:", error);
+                    $(`#alert${thisId}`).text("An error occurred")
+                    window.location.reload();
                 }
             });
         });
