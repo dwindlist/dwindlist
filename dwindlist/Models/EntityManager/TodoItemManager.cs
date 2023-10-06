@@ -6,21 +6,22 @@ namespace dwindlist.Models.EntityManager;
 
 public class TodoItemManager
 {
-    public TodoList GetTodoList(string userId, int? parentId)
+    public TodoList GetTodoList(string userId, int? rootId)
     {
-        if (parentId == null)
+        if (rootId == null)
         {
-            parentId = 0;
+            rootId = 0;
         }
 
         using (ApplicationDbContext db = new ApplicationDbContext())
         {
-            var parents = db.TodoItem.Where(i => i.ParentId == parentId && i.UserId == userId).ToList();
-            var todoList = new TodoList { RootId = (int)parentId };
+            var userItems = db.TodoItem.Where(i => i.UserId == userId);
+            var parents = userItems.Where(i => i.ParentId == rootId).ToList();
+            var todoList = new TodoList { RootId = (int)rootId };
 
             foreach (var parent in parents)
             {
-                var children = db.TodoItem.Where(i => i.ParentId == parent.Id && i.UserId == userId).ToList();
+                var children = userItems.Where(i => i.ParentId == parent.Id).ToList();
                 var sublist = new List<TodoChild>();
 
                 foreach (var child in children)
@@ -28,7 +29,8 @@ public class TodoItemManager
                     sublist.Add(new TodoChild
                     {
                         Id = child.Id,
-                        Label = child.Label
+                        Label = child.Label,
+                        Status = child.Status
                     });
                 }
 
@@ -36,6 +38,7 @@ public class TodoItemManager
                 {
                     Id = parent.Id,
                     Label = parent.Label,
+                    Status = parent.Status,
                     Children = sublist
                 });
 
@@ -45,7 +48,7 @@ public class TodoItemManager
         }
     }
 
-    public int AddItem(TodoItemAddDto todoItemDto)
+    public void AddItem(TodoItemAddDto todoItemDto)
     {
         using (ApplicationDbContext db = new ApplicationDbContext())
         {
@@ -59,8 +62,18 @@ public class TodoItemManager
 
             db.TodoItem.Add(newItem);
             db.SaveChanges();
+        }
+    }
 
-            return newItem.Id;
+    public void ToggleItem(string userId, int itemId)
+    {
+        using (ApplicationDbContext db = new ApplicationDbContext())
+        {
+            var userItems = db.TodoItem.Where(i => i.UserId == userId);
+            var item = userItems.Single(i => i.Id == itemId);
+            item.Status = item.Status == 'i' ? 'c' : 'i';
+
+            db.SaveChanges();
         }
     }
 }

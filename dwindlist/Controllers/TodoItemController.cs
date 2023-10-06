@@ -3,7 +3,6 @@ using dwindlist.Models.EntityManager;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Text.Json;
 
 namespace dwindlist.Controllers;
 
@@ -64,11 +63,29 @@ public class TodoItemController : Controller
 
         todoItemAddDto.UserId = userId;
         var todoItemManager = new TodoItemManager();
-        todoItemAddDto.Id = todoItemManager.AddItem(todoItemAddDto);
-        todoItemAddDto.UserId = null;
+        todoItemManager.AddItem(todoItemAddDto);
 
-        var json = JsonSerializer.Serialize(todoItemAddDto);
+        return Ok();
+    }
 
-        return Ok(json);
+    [Authorize]
+    [HttpPut]
+    public ActionResult Toggle(int id)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = GetUserId(User.Identity as ClaimsIdentity);
+        if (userId == null)
+        {
+            return BadRequest();
+        }
+
+        var todoItemManager = new TodoItemManager();
+        todoItemManager.ToggleItem(userId, id);
+
+        return Ok();
     }
 }
