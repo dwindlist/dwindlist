@@ -2,6 +2,9 @@
 @{
     ViewData["Title"] = "Home Page";
 }
+
+<h1>dwindlist > @Model.Label</h1>
+
 <div class="container mt-4">
     <div class="row">
         <!-- Right Column (Button to Add Checkboxes) -->
@@ -36,6 +39,7 @@
                 {
                 <input type="text" style="text-decoration: none;" disabled="true" class="form-control" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
                 }
+                <a href="/TodoItem/Index/@(item.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button></a>
                 <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
                 <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
@@ -70,6 +74,7 @@
                         {
                         <input type="text" style="text-decoration: none;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
                         }
+                        <a href="/TodoItem/Index/@(subitem.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button></a>
                         <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
                         <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
                         <button class="btn btn-sm btn-danger">Delete</button>

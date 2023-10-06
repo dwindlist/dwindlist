@@ -19,6 +19,11 @@ public class TodoItemManager
             var parents = userItems.Where(i => i.ParentId == rootId).ToList();
             var todoList = new TodoList { RootId = (int)rootId };
 
+            if (rootId != 0)
+            {
+                todoList.Label = userItems.Single(i => i.Id == rootId).Label;
+            }
+
             foreach (var parent in parents)
             {
                 var children = userItems.Where(i => i.ParentId == parent.Id).ToList();
