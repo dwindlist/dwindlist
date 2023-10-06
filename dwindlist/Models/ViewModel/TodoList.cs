@@ -4,6 +4,7 @@ public class TodoList
 {
     public List<TodoParent> Items { get; set; } = new List<TodoParent>();
     public int RootId { get; set; } = 0;
+    public string Label { get; set; } = "";
 }
 
 public class TodoParent
