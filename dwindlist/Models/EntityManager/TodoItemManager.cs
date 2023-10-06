@@ -16,15 +16,29 @@ public class TodoItemManager
         using (ApplicationDbContext db = new ApplicationDbContext())
         {
             var parents = db.TodoItem.Where(i => i.ParentId == parentId && i.UserId == userId).ToList();
+            var todoList = new TodoList { RootId = (int)parentId };
 
-            var todoList = new TodoList();
             foreach (var parent in parents)
             {
+                var children = db.TodoItem.Where(i => i.ParentId == parent.Id && i.UserId == userId).ToList();
+                var sublist = new List<TodoChild>();
+
+                foreach (var child in children)
+                {
+                    sublist.Add(new TodoChild
+                    {
+                        Id = child.Id,
+                        Label = child.Label
+                    });
+                }
+
                 todoList.Items.Add(new TodoParent
                 {
                     Id = parent.Id,
                     Label = parent.Label,
+                    Children = sublist
                 });
+
             }
 
             return todoList;

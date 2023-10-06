@@ -2,15 +2,17 @@
 @{
     ViewData["Title"] = "Home Page";
 }
+<button id="throwaway" value="testing">Click me!</button>
+
 <div class="container mt-4">
-    @* <div class="row"> *@
+    <div class="row">
         <!-- Right Column (Button to Add Checkboxes) -->
-        <div class="text-danger" role="alert"></div>
+        <div class="text-danger" role="alert" id="alert@(Model.RootId)"></div>
         <div class="form-group">
-            <label for="newItem">New Item:</label>
-            <input type="text" class="form-control" id="newItem">
+            <label for="new-item@(Model.RootId)">New Item:</label>
+            <input type="text" class="form-control" id="new-item@(Model.RootId)">
+            <button type="button" class="btn btn-primary save-changes" id="save-changes@(Model.RootId)" value="@Model.RootId">Add Item</button>
         </div>
-        <button type="button" class="btn btn-primary" id="saveChanges">Save Changes</button>
 
         <div id="todo-list">
             @foreach(var item in Model.Items)
@@ -22,10 +24,30 @@
                     </div>
                 </div>
                 <input type="text" disabled="true" class="form-control" aria-label="Text input with checkbox" style="width: calc(100% - 60px);" value="@item.Id: @item.Label">
-                <button class="btn btn-sm btn-primary">Edit</button>
+                <button class="btn btn-sm btn-success">Edit</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
-                <button class="btn btn-sm btn-success">Add Sub-Checkbox</button>
             </div>
+                <div class="col-md-11 float-end">
+                    <div class="text-danger" role="alert" id="alert@(item.Id)"></div>
+                    <div class="form-group">
+                        <label for="new-item@(item.Id)">New Item:</label>
+                        <input type="text" class="form-control" id="new-item@(item.Id)">
+                        <button type="button" class="btn btn-primary save-changes" id="save-changes@(item.Id)" value="@item.Id">Add Item</button>
+                    </div>
+                @foreach(var subitem in item.Children)
+                {
+                    <div class="input-group mb-3" style="width: 100%;">
+                        <div class="input-group-prepend" style="width: 30px;">
+                            <div class="input-group-text">
+                                <input type="checkbox" aria-label="Main Checkbox">
+                            </div>
+                        </div>
+                        <input type="text" disabled="true" class="form-control" aria-label="Text input with checkbox" style="width: calc(100% - 60px);" value="@subitem.Id: @subitem.Label">
+                        <button class="btn btn-sm btn-success">Edit</button>
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </div>
+                }
+                </div>
             }
         </div>
 
@@ -47,18 +69,26 @@
                 </div>
             </div>
         </div>
-    @* </div> *@
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
     $(document).ready(function () {
-        let newItem = $("#newItem")
-        $("#saveChanges").click(function () {
+        let testButton = $("#throwaway");
+
+        testButton.click(function() {
+            alert(testButton.val());
+        });
+
+        let saveChanges = $(".save-changes");
+        saveChanges.click(function () {
+            let thisElement = $("#" + $(this).attr("id"))
+            let thisId = $(thisElement).val();
             let userData = {
-                Label: newItem.val(),
-                ParentId: 0,
+                Label: $("#new-item" + thisId).val(),
+                ParentId: thisId,
                 Status: 'i',
             };
 
@@ -72,28 +102,12 @@
                 success: function (response) {
                     // Handle the API response as needed
                     console.log("Todo list item added successfully");
-                    response = JSON.parse(response);
-                    console.log(response);
-                    console.log(response["Label"]);
-                    $(".text-danger").empty();
-                    $("#todo-list").append(`
-<div class="input-group mb-3" style="width: 100%;">
-    <div class="input-group-prepend" style="width: 30px;">
-        <div class="input-group-text">
-            <input type="checkbox" aria-label="Main Checkbox">
-        </div>
-    </div>
-    <input type="text" disabled="true" class="form-control" aria-label="Text input with checkbox" style="width: calc(100% - 60px);" value="${response["Label"]}">
-    <button class="btn btn-sm btn-primary">Edit</button>
-    <button class="btn btn-sm btn-danger">Delete</button>
-    <button class="btn btn-sm btn-success">Add Sub-Checkbox</button>
-</div>
-`);
+                    window.location.reload();
                 },
                 error: function (error) {
                     // Handle API error
                     console.error("Error adding todo list item:", error);
-                    $(".text-danger").text("An error occurred")
+                    $("#alert" + thisId).text("An error occurred")
                 }
             });
         });
