@@ -61,9 +61,8 @@ public class TodoItemController : Controller
             return BadRequest();
         }
 
-        todoItemAddDto.UserId = userId;
         var todoItemManager = new TodoItemManager();
-        todoItemManager.AddItem(todoItemAddDto);
+        todoItemManager.AddItem(userId, todoItemAddDto);
 
         return Ok();
     }
@@ -85,6 +84,27 @@ public class TodoItemController : Controller
 
         var todoItemManager = new TodoItemManager();
         todoItemManager.ToggleItem(userId, id);
+
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPut]
+    public ActionResult UpdateLabel(int id, [FromBody] TodoItemUpdateDto todoItemUpdateDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = GetUserId(User.Identity as ClaimsIdentity);
+        if (userId == null)
+        {
+            return BadRequest();
+        }
+
+        var todoItemManager = new TodoItemManager();
+        todoItemManager.UpdateItemLabel(userId, id, todoItemUpdateDto);
 
         return Ok();
     }

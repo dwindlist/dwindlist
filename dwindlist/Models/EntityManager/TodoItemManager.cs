@@ -48,19 +48,31 @@ public class TodoItemManager
         }
     }
 
-    public void AddItem(TodoItemAddDto todoItemDto)
+    public void AddItem(string userId, TodoItemAddDto todoItemDto)
     {
         using (ApplicationDbContext db = new ApplicationDbContext())
         {
             var newItem = new TodoItem
             {
-                UserId = todoItemDto.UserId,
+                UserId = userId,
                 Label = todoItemDto.Label,
                 ParentId = todoItemDto.ParentId,
                 Status = todoItemDto.Status,
             };
 
             db.TodoItem.Add(newItem);
+            db.SaveChanges();
+        }
+    }
+
+    public void UpdateItemLabel(string userId, int itemId, TodoItemUpdateDto todoItemDto)
+    {
+        using (ApplicationDbContext db = new ApplicationDbContext())
+        {
+            var userItems = db.TodoItem.Where(i => i.UserId == userId);
+            var item = userItems.Single(i => i.Id == itemId);
+            item.Label = todoItemDto.Label;
+
             db.SaveChanges();
         }
     }
