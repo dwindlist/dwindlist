@@ -1,5 +1,5 @@
+using dwindlist.Data;
 using dwindlist.Dtos;
-using dwindlist.Models.DB;
 
 namespace dwindlist.Models.EntityManager;
 
@@ -7,7 +7,7 @@ public class TodoItemManager
 {
     public int AddItem(TodoItemAddDto todoItemDto)
     {
-        using (TodoItemDBContext db = new TodoItemDBContext())
+        using (ApplicationDbContext db = new ApplicationDbContext())
         {
             var newItem = new TodoItem
             {
