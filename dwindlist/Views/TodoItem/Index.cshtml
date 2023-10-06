@@ -20,10 +20,24 @@
             <div class="input-group mb-3" style="width: 100%;">
                 <div class="input-group-prepend" style="width: 30px;">
                     <div class="input-group-text">
-                        <input type="checkbox" aria-label="Main Checkbox">
+                        @if (item.Status == 'c')
+                        {
+                        <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" checked>
+                        }
+                        else
+                        {
+                        <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox">
+                        }
                     </div>
                 </div>
-                <input type="text" disabled="true" class="form-control" aria-label="Text input with checkbox" style="width: calc(100% - 60px);" value="@item.Id: @item.Label">
+                @if (item.Status == 'c')
+                {
+                <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" aria-label="Text input with checkbox" value="@item.Id: @item.Label">
+                }
+                else
+                {
+                <input type="text" style="text-decoration: none;" disabled="true" class="form-control" aria-label="Text input with checkbox" value="@item.Id: @item.Label">
+                }
                 <button class="btn btn-sm btn-success">Edit</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
             </div>
@@ -39,10 +53,24 @@
                     <div class="input-group mb-3" style="width: 100%;">
                         <div class="input-group-prepend" style="width: 30px;">
                             <div class="input-group-text">
-                                <input type="checkbox" aria-label="Main Checkbox">
+                                @if (subitem.Status == 'c')
+                                {
+                                <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" checked>
+                                }
+                                else
+                                {
+                                <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox">
+                                }
                             </div>
                         </div>
-                        <input type="text" disabled="true" class="form-control" aria-label="Text input with checkbox" style="width: calc(100% - 60px);" value="@subitem.Id: @subitem.Label">
+                        @if (subitem.Status == 'c')
+                        {
+                        <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" aria-label="Text input with checkbox" value="@subitem.Id: @subitem.Label">
+                        }
+                        else
+                        {
+                        <input type="text" style="text-decoration: none;" disabled="true" class="form-control" aria-label="Text input with checkbox" value="@subitem.Id: @subitem.Label">
+                        }
                         <button class="btn btn-sm btn-success">Edit</button>
                         <button class="btn btn-sm btn-danger">Delete</button>
                     </div>
@@ -82,9 +110,32 @@
             alert(testButton.val());
         });
 
+        let toggleStatus = $(".toggle-status")
+        toggleStatus.click(function() {
+            let thisElement = $(`#${$(this).attr("id")}`)
+            let thisId = $(thisElement).val();
+            thisElement.prop("disabled", true);
+            // alert(thisId);
+            // return;
+            $.ajax({
+                type: "PUT",
+                url: `/todoitem/toggle/${thisId}`,
+                success: function (response) {
+                    // Handle the API response as needed
+                    console.log("Todo list item toggled successfully");
+                    window.location.reload();
+                },
+                error: function (error) {
+                    // Handle API error
+                    console.error("Error adding toggling todo list item:", error);
+                    $(`#alert${thisId}`).text("An error occurred")
+                }
+            });
+        });
+
         let saveChanges = $(".save-changes");
         saveChanges.click(function () {
-            let thisElement = $("#" + $(this).attr("id"))
+            let thisElement = $(`#${$(this).attr("id")}`)
             let thisId = $(thisElement).val();
             let userData = {
                 Label: $("#new-item" + thisId).val(),
@@ -107,7 +158,7 @@
                 error: function (error) {
                     // Handle API error
                     console.error("Error adding todo list item:", error);
-                    $("#alert" + thisId).text("An error occurred")
+                    $(`#alert${thisId}`).text("An error occurred")
                 }
             });
         });
