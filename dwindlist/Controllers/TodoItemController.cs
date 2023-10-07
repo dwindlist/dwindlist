@@ -8,7 +8,7 @@ namespace dwindlist.Controllers;
 
 public class TodoItemController : Controller
 {
-    public string? GetUserId(ClaimsIdentity? claimsIdentity)
+    private string? GetUserId(ClaimsIdentity? claimsIdentity)
     {
         if (claimsIdentity == null)
         {
