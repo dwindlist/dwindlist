@@ -20,3 +20,13 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.logo-login {
+    width: 200px;
+    border-radius: 100%;
+    border: 1px solid #eee;
+}
+
+.login-dwindlist {
+    margin-top: 75px;
+}
