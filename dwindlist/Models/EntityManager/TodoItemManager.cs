@@ -2,26 +2,22 @@ using dwindlist.Data;
 using dwindlist.Dtos;
 using dwindlist.Models.ViewModel;
 
-namespace dwindlist.Models.EntityManager;
-
-public class TodoItemManager
+namespace dwindlist.Models.EntityManager
 {
-    public TodoList GetTodoList(string userId, int? rootId)
+    public class TodoItemManager
     {
-        if (rootId == null)
+        public TodoList GetTodoList(string userId, int? rootId)
         {
-            rootId = 0;
-        }
+            rootId ??= 0;
 
-        using (ApplicationDbContext db = new ApplicationDbContext())
-        {
-            var userItems = db.TodoItem.Where(i => i.UserId == userId);
-            var parents = userItems.Where(i => i.ParentId == rootId).ToList();
-            var todoList = new TodoList { RootId = (int)rootId };
+            using ApplicationDbContext db = new();
+            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            List<TodoItem> parents = userItems.Where(i => i.ParentId == rootId).ToList();
+            TodoList todoList = new() { RootId = (int)rootId };
 
             if (rootId != 0)
             {
-                var currentItem = userItems.Single(i => i.Id == rootId);
+                TodoItem currentItem = userItems.Single(i => i.Id == rootId);
                 todoList.Label = currentItem.Label;
                 while (currentItem.ParentId != 0)
                 {
@@ -33,12 +29,12 @@ public class TodoItemManager
                 }
             }
 
-            foreach (var parent in parents)
+            foreach (TodoItem parent in parents)
             {
-                var children = userItems.Where(i => i.ParentId == parent.Id).ToList();
-                var sublist = new List<TodoChild>();
+                List<TodoItem> children = userItems.Where(i => i.ParentId == parent.Id).ToList();
+                List<TodoChild> sublist = new();
 
-                foreach (var child in children)
+                foreach (TodoItem child in children)
                 {
                     sublist.Add(
                         new TodoChild
@@ -65,13 +61,11 @@ public class TodoItemManager
 
             return todoList;
         }
-    }
 
-    public void AddItem(string userId, int parentId, TodoItemDto todoItemDto)
-    {
-        using (ApplicationDbContext db = new ApplicationDbContext())
+        public void AddItem(string userId, int parentId, TodoItemDto todoItemDto)
         {
-            var newItem = new TodoItem
+            using ApplicationDbContext db = new();
+            TodoItem newItem = new()
             {
                 UserId = userId,
                 Label = todoItemDto.Label,
@@ -79,44 +73,38 @@ public class TodoItemManager
                 Status = 'i',
             };
 
-            db.TodoItem.Add(newItem);
-            db.SaveChanges();
+            _ = db.TodoItem.Add(newItem);
+            _ = db.SaveChanges();
         }
-    }
 
-    public void UpdateItemLabel(string userId, int itemId, TodoItemDto todoItemDto)
-    {
-        using (ApplicationDbContext db = new ApplicationDbContext())
+        public void UpdateItemLabel(string userId, int itemId, TodoItemDto todoItemDto)
         {
-            var userItems = db.TodoItem.Where(i => i.UserId == userId);
-            var item = userItems.Single(i => i.Id == itemId);
+            using ApplicationDbContext db = new();
+            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            TodoItem item = userItems.Single(i => i.Id == itemId);
             item.Label = todoItemDto.Label;
 
-            db.SaveChanges();
+            _ = db.SaveChanges();
         }
-    }
 
-    public void ToggleItemStatus(string userId, int itemId)
-    {
-        using (ApplicationDbContext db = new ApplicationDbContext())
+        public void ToggleItemStatus(string userId, int itemId)
         {
-            var userItems = db.TodoItem.Where(i => i.UserId == userId);
-            var item = userItems.Single(i => i.Id == itemId);
+            using ApplicationDbContext db = new();
+            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            TodoItem item = userItems.Single(i => i.Id == itemId);
             item.Status = item.Status == 'i' ? 'c' : 'i';
 
-            db.SaveChanges();
+            _ = db.SaveChanges();
         }
-    }
 
-    public void ToggleItemExpanded(string userId, int itemId)
-    {
-        using (ApplicationDbContext db = new ApplicationDbContext())
+        public void ToggleItemExpanded(string userId, int itemId)
         {
-            var userItems = db.TodoItem.Where(i => i.UserId == userId);
-            var item = userItems.Single(i => i.Id == itemId);
+            using ApplicationDbContext db = new();
+            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            TodoItem item = userItems.Single(i => i.Id == itemId);
             item.Expanded = item.Expanded == 'c' ? 'e' : 'c';
 
-            db.SaveChanges();
+            _ = db.SaveChanges();
         }
     }
 }

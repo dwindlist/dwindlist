@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace dwindlist.Dtos;
-
-public class TodoItemDto
+namespace dwindlist.Dtos
 {
-    [Required]
-    [MaxLength(256), MinLength(1)]
-    public string Label { get; set; } = "";
+    public class TodoItemDto
+    {
+        [Required]
+        [MaxLength(256), MinLength(1)]
+        public string Label { get; set; } = "";
+    }
 }
