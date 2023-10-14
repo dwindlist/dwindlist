@@ -1,4 +1,4 @@
-﻿@model dwindlist.Models.ViewModel.TodoList
+﻿@model dwindlist.Models.ViewModel.FilteredList
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -6,24 +6,11 @@
 <h1>dwindlist</h1>
 <div id="breadcrumbs">
 <a href="/TodoItem/Index">dwindlist</a>
-@foreach (var breadcrumb in Model.Breadcrumbs)
-{
-<span>></span> <a href="/TodoItem/Index/@(breadcrumb.Id)">@breadcrumb.Label</a>
-}
->
-@Model.Label
+> @Model.Label
 </div>
 
 <div class="container mt-4">
     <div class="row">
-        <!-- Right Column (Button to Add Checkboxes) -->
-        <div class="text-danger" role="alert" id="alert@(Model.RootId)"></div>
-        <div class="form-group">
-            <label for="new-item-label@(Model.RootId)">New Item:</label>
-            <input type="text" class="form-control" id="new-item-label@(Model.RootId)">
-            <button type="button" class="btn btn-primary add-item" id="add-item@(Model.RootId)" value="@Model.RootId">Add Item</button>
-        </div>
-
         <div id="todo-list">
             @foreach(var item in Model.Items)
             {
@@ -34,34 +21,11 @@
                     </div>
                 </div>
                 <input type="text" style="text-decoration: @(item.Status == 'c' ? "line-through" : "none");" disabled="true" class="form-control" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
-                <button class="btn btn-sm btn-secondary toggle-expand" id="toggle-expand@(item.Id)" value="@item.Id">@(item.Expanded == 'c' ? ">" : "V")</button>
                 <a href="/TodoItem/Index/@(item.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button></a>
                 <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
                 <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
-            </div>
-            <div class="col-md-11 float-end parent-item" id="parent-item@(item.Id)" @(item.Expanded == 'c' ? "hidden" : "")>
-                <div class="text-danger" role="alert" id="alert@(item.Id)"></div>
-                <div class="form-group">
-                    <label for="new-item-label@(item.Id)">New Item:</label>
-                    <input type="text" class="form-control" id="new-item-label@(item.Id)">
-                    <button type="button" class="btn btn-primary add-item" id="add-item@(item.Id)" value="@item.Id">Add Item</button>
-                </div>
-                @foreach(var subitem in item.Children)
-                {
-                <div class="input-group mb-3" style="width: 100%;">
-                    <div class="input-group-prepend" style="width: 30px;">
-                        <div class="input-group-text">
-                            <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" @(subitem.Status == 'c' ? "checked" : "")>
-                        </div>
-                    </div>
-                    <input type="text" style="text-decoration: @(subitem.Status == 'c' ? "line-through" : "none");" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
-                    <a href="/TodoItem/Index/@(subitem.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button></a>
-                    <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
-                    <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                </div>
-                }
+                @*TODO: breadcrumbs*@
             </div>
             }
         </div>

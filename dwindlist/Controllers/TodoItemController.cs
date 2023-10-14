@@ -16,8 +16,9 @@ namespace dwindlist.Controllers
                 return null;
             }
 
-            Claim? userIdClaim = claimsIdentity.Claims
-                .FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+            Claim? userIdClaim = claimsIdentity.Claims.FirstOrDefault(
+                x => x.Type == ClaimTypes.NameIdentifier
+            );
 
             return userIdClaim?.Value;
         }
@@ -37,6 +38,51 @@ namespace dwindlist.Controllers
             TodoList todoList = todoItemManager.GetTodoList(userId, (int)id);
 
             return View(todoList);
+        }
+
+        [Authorize]
+        public IActionResult Search(string id)
+        {
+            string? userId = GetUserId(User.Identity as ClaimsIdentity);
+            if (userId == null)
+            {
+                return BadRequest();
+            }
+
+            TodoItemManager todoItemManager = new();
+            FilteredList filteredList = todoItemManager.SearchTodoList(userId, id);
+
+            return View("Filtered", filteredList);
+        }
+
+        [Authorize]
+        public IActionResult Completed()
+        {
+            string? userId = GetUserId(User.Identity as ClaimsIdentity);
+            if (userId == null)
+            {
+                return BadRequest();
+            }
+
+            TodoItemManager todoItemManager = new();
+            FilteredList filteredList = todoItemManager.FilterTodoListByStatus(userId, true);
+
+            return View("Filtered", filteredList);
+        }
+
+        [Authorize]
+        public IActionResult Incomplete()
+        {
+            string? userId = GetUserId(User.Identity as ClaimsIdentity);
+            if (userId == null)
+            {
+                return BadRequest();
+            }
+
+            TodoItemManager todoItemManager = new();
+            FilteredList filteredList = todoItemManager.FilterTodoListByStatus(userId, false);
+
+            return View("Filtered", filteredList);
         }
 
         [Authorize]

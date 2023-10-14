@@ -62,16 +62,27 @@ namespace dwindlist.Models.EntityManager
             return todoList;
         }
 
+        public FilteredList SearchTodoList(string userId, string pattern)
+        {
+            return FilterTodoList(userId, pattern, new FilterSearch());
+        }
+
+        public FilteredList FilterTodoListByStatus(string userId, bool completed)
+        {
+            return FilterTodoList(userId, completed ? "completed" : string.Empty, new FilterStatus());
+        }
+
         public void AddItem(string userId, int parentId, TodoItemDto todoItemDto)
         {
             using ApplicationDbContext db = new();
-            TodoItem newItem = new()
-            {
-                UserId = userId,
-                Label = todoItemDto.Label,
-                ParentId = parentId,
-                Status = 'i',
-            };
+            TodoItem newItem =
+                new()
+                {
+                    UserId = userId,
+                    Label = todoItemDto.Label,
+                    ParentId = parentId,
+                    Status = 'i',
+                };
 
             _ = db.TodoItem.Add(newItem);
             _ = db.SaveChanges();
@@ -105,6 +116,53 @@ namespace dwindlist.Models.EntityManager
             item.Expanded = item.Expanded == 'c' ? 'e' : 'c';
 
             _ = db.SaveChanges();
+        }
+
+        internal static FilteredList FilterTodoList(string userId, string pattern, IFilter filter)
+        {
+            using ApplicationDbContext db = new();
+            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            List<TodoItem> filteredItems = filter.Filter(userItems, pattern);
+
+            FilteredList filteredList = new();
+
+            // TODO: Breadcrumbs
+            foreach (TodoItem item in filteredItems)
+            {
+                filteredList.Items.Add(
+                    new FilteredItem
+                    {
+                        Id = item.Id,
+                        Label = item.Label,
+                        Status = item.Status,
+                        Breadcrumbs = new List<Breadcrumb>()
+                    }
+                );
+            }
+
+            return filteredList;
+        }
+    }
+
+    internal interface IFilter
+    {
+        public List<TodoItem> Filter(IQueryable<TodoItem> list, string pattern);
+    }
+
+    internal class FilterSearch : IFilter
+    {
+        public List<TodoItem> Filter(IQueryable<TodoItem> list, string pattern)
+        {
+            return list.Where(i => i.Label.Contains(pattern)).ToList();
+        }
+    }
+
+    internal class FilterStatus : IFilter
+    {
+        public List<TodoItem> Filter(IQueryable<TodoItem> list, string pattern)
+        {
+            char status = pattern == "completed" ? 'c' : 'i';
+            return list.Where(i => i.Status == status).ToList();
         }
     }
 }

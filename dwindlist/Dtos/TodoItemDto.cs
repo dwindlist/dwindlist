@@ -6,6 +6,6 @@ namespace dwindlist.Dtos
     {
         [Required]
         [MaxLength(256), MinLength(1)]
-        public string Label { get; set; } = "";
+        public string Label { get; set; } = string.Empty;
     }
 }
