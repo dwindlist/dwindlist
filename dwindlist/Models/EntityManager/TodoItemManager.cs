@@ -35,7 +35,8 @@ public class TodoItemManager
                     {
                         Id = child.Id,
                         Label = child.Label,
-                        Status = child.Status
+                        Status = child.Status,
+                        Expanded = child.Expanded
                     });
                 }
 
@@ -44,6 +45,7 @@ public class TodoItemManager
                     Id = parent.Id,
                     Label = parent.Label,
                     Status = parent.Status,
+                    Expanded = parent.Expanded,
                     Children = sublist
                 });
 
@@ -53,7 +55,7 @@ public class TodoItemManager
         }
     }
 
-    public void AddItem(string userId, TodoItemAddDto todoItemDto)
+    public void AddItem(string userId, int parentId, TodoItemDto todoItemDto)
     {
         using (ApplicationDbContext db = new ApplicationDbContext())
         {
@@ -61,8 +63,8 @@ public class TodoItemManager
             {
                 UserId = userId,
                 Label = todoItemDto.Label,
-                ParentId = todoItemDto.ParentId,
-                Status = todoItemDto.Status,
+                ParentId = parentId,
+                Status = 'i',
             };
 
             db.TodoItem.Add(newItem);
@@ -70,7 +72,7 @@ public class TodoItemManager
         }
     }
 
-    public void UpdateItemLabel(string userId, int itemId, TodoItemUpdateDto todoItemDto)
+    public void UpdateItemLabel(string userId, int itemId, TodoItemDto todoItemDto)
     {
         using (ApplicationDbContext db = new ApplicationDbContext())
         {
@@ -82,13 +84,25 @@ public class TodoItemManager
         }
     }
 
-    public void ToggleItem(string userId, int itemId)
+    public void ToggleItemStatus(string userId, int itemId)
     {
         using (ApplicationDbContext db = new ApplicationDbContext())
         {
             var userItems = db.TodoItem.Where(i => i.UserId == userId);
             var item = userItems.Single(i => i.Id == itemId);
             item.Status = item.Status == 'i' ? 'c' : 'i';
+
+            db.SaveChanges();
+        }
+    }
+
+    public void ToggleItemExpanded(string userId, int itemId)
+    {
+        using (ApplicationDbContext db = new ApplicationDbContext())
+        {
+            var userItems = db.TodoItem.Where(i => i.UserId == userId);
+            var item = userItems.Single(i => i.Id == itemId);
+            item.Expanded = item.Expanded == 'c' ? 'e' : 'c';
 
             db.SaveChanges();
         }

@@ -21,30 +21,17 @@
             <div class="input-group mb-3" style="width: 100%;">
                 <div class="input-group-prepend" style="width: 30px;">
                     <div class="input-group-text">
-                        @if (item.Status == 'c')
-                        {
-                        <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" checked>
-                        }
-                        else
-                        {
-                        <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox">
-                        }
+                        <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
                     </div>
                 </div>
-                @if (item.Status == 'c')
-                {
-                <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
-                }
-                else
-                {
-                <input type="text" style="text-decoration: none;" disabled="true" class="form-control" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
-                }
+                <input type="text" style="text-decoration: @(item.Status == 'c' ? "line-through" : "none");" disabled="true" class="form-control" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
                 <a href="/TodoItem/Index/@(item.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button></a>
+                <button class="btn btn-sm btn-secondary toggle-expand" id="toggle-expand@(item.Id)" value="@item.Id">@(item.Expanded == 'c' ? "Expand" : "Collapse")</button>
                 <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
                 <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
             </div>
-            <div class="col-md-11 float-end">
+            <div class="col-md-11 float-end parent-item" id="parent-item@(item.Id)" @(item.Expanded == 'c' ? "hidden" : "")>
                 <div class="text-danger" role="alert" id="alert@(item.Id)"></div>
                 <div class="form-group">
                     <label for="new-item-label@(item.Id)">New Item:</label>
@@ -56,25 +43,11 @@
                 <div class="input-group mb-3" style="width: 100%;">
                     <div class="input-group-prepend" style="width: 30px;">
                         <div class="input-group-text">
-                            @if (subitem.Status == 'c')
-                            {
-                            <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" checked>
-                            }
-                            else
-                            {
-                            <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox">
-                            }
+                            <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" @(subitem.Status == 'c' ? "checked" : "")>
                         </div>
                     </div>
-                    @if (subitem.Status == 'c')
-                    {
-                    <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
-                    }
-                    else
-                    {
-                    <input type="text" style="text-decoration: none;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
-                    }
-                    <a href="/TodoItem/Index/@(subitem.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button></a>
+                    <input type="text" style="text-decoration: @(subitem.Status == 'c' ? "line-through" : "none");" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
+										<a href="/TodoItem/Index/@(subitem.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button></a>
                     <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
                     <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
                     <button class="btn btn-sm btn-danger">Delete</button>
@@ -115,16 +88,13 @@
             alert(testButton.val());
         });
 
-        $(".toggle-status").click(function() {
+        $(".toggle-expand").click(function() {
             let thisElement = $(`#${$(this).attr("id")}`);
             let thisId = $(thisElement).val();
 
-            thisElement.prop("disabled", true);
-            $(`#new-item-label${thisId}`).prop("disabled", true);
-
             $.ajax({
                 type: "PUT",
-                url: `/todoitem/toggle/${thisId}`,
+                url: `/todoitem/toggleexpanded/${thisId}`,
                 success: function (response) {
                     // Handle the API response as needed
                     console.log("Todo list item toggled successfully");
@@ -134,7 +104,29 @@
                     // Handle API error
                     console.error("Error adding toggling todo list item:", error);
                     $(`#alert${thisId}`).text("An error occurred")
+                }
+            });
+        });
+
+        $(".toggle-status").click(function() {
+            let thisElement = $(`#${$(this).attr("id")}`);
+            let thisId = $(thisElement).val();
+
+            thisElement.prop("disabled", true);
+            $(`#new-item-label${thisId}`).prop("disabled", true);
+
+            $.ajax({
+                type: "PUT",
+                url: `/todoitem/togglestatus/${thisId}`,
+                success: function (response) {
+                    // Handle the API response as needed
+                    console.log("Todo list item toggled successfully");
                     window.location.reload();
+                },
+                error: function (error) {
+                    // Handle API error
+                    console.error("Error adding toggling todo list item:", error);
+                    $(`#alert${thisId}`).text("An error occurred")
                 }
             });
         });
@@ -155,7 +147,7 @@
 
             $.ajax({
                 type: "POST",
-                url: "/todoitem/add",
+								url: `/todoitem/add/${thisId}`,
                 data: JSON.stringify(userData),
                 contentType: "application/json; charset=utf-8",
                 success: function (response) {
@@ -167,7 +159,6 @@
                     // Handle API error
                     console.error("Error adding todo list item:", error);
                     $(`#alert${thisId}`).text("An error occurred")
-                    window.location.reload();
                 }
             });
         });
@@ -208,7 +199,6 @@
                     // Handle API error
                     console.error("Error updating todo list item:", error);
                     $(`#alert${thisId}`).text("An error occurred")
-                    window.location.reload();
                 }
             });
         });

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace dwindlist.Dtos;
 
-public class TodoItemUpdateDto
+public class TodoItemDto
 {
     [Required]
     [MaxLength(256), MinLength(1)]

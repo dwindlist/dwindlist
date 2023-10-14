@@ -17,4 +17,5 @@ public class TodoItem
     public string Label { get; set; }
     public int ParentId { get; set; } = 0;
     public char Status { get; set; } = 'i';
+    public char Expanded { get; set; } = 'c';
 }

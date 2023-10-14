@@ -48,7 +48,7 @@ public class TodoItemController : Controller
 
     [Authorize]
     [HttpPost]
-    public ActionResult Add([FromBody] TodoItemAddDto todoItemAddDto)
+    public ActionResult Add(int id, [FromBody] TodoItemDto todoItemDto)
     {
         if (!ModelState.IsValid)
         {
@@ -62,14 +62,14 @@ public class TodoItemController : Controller
         }
 
         var todoItemManager = new TodoItemManager();
-        todoItemManager.AddItem(userId, todoItemAddDto);
+        todoItemManager.AddItem(userId, id, todoItemDto);
 
         return Ok();
     }
 
     [Authorize]
     [HttpPut]
-    public ActionResult Toggle(int id)
+    public ActionResult ToggleStatus(int id)
     {
         if (!ModelState.IsValid)
         {
@@ -83,14 +83,14 @@ public class TodoItemController : Controller
         }
 
         var todoItemManager = new TodoItemManager();
-        todoItemManager.ToggleItem(userId, id);
+        todoItemManager.ToggleItemStatus(userId, id);
 
         return Ok();
     }
 
     [Authorize]
     [HttpPut]
-    public ActionResult UpdateLabel(int id, [FromBody] TodoItemUpdateDto todoItemUpdateDto)
+    public ActionResult ToggleExpanded(int id)
     {
         if (!ModelState.IsValid)
         {
@@ -104,7 +104,28 @@ public class TodoItemController : Controller
         }
 
         var todoItemManager = new TodoItemManager();
-        todoItemManager.UpdateItemLabel(userId, id, todoItemUpdateDto);
+        todoItemManager.ToggleItemExpanded(userId, id);
+
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpPut]
+    public ActionResult UpdateLabel(int id, [FromBody] TodoItemDto todoItemDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = GetUserId(User.Identity as ClaimsIdentity);
+        if (userId == null)
+        {
+            return BadRequest();
+        }
+
+        var todoItemManager = new TodoItemManager();
+        todoItemManager.UpdateItemLabel(userId, id, todoItemDto);
 
         return Ok();
     }

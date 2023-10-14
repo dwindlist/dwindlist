@@ -24,8 +24,15 @@ namespace dwindlist.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TodoItem", x => x.Id);
-                    table.ForeignKey("FK_TodoItem_AspNetUsers_UserId", x => x.UserId, "AspNetUsers");
                 });
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_TodoItem_AspNetUsers_UserId",
+                table: "TodoItem",
+                column: "UserId",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TodoItem_UserId",
