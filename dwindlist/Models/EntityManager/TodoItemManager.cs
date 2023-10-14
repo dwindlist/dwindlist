@@ -21,7 +21,16 @@ public class TodoItemManager
 
             if (rootId != 0)
             {
-                todoList.Label = userItems.Single(i => i.Id == rootId).Label;
+                var currentItem = userItems.Single(i => i.Id == rootId);
+                todoList.Label = currentItem.Label;
+                while (currentItem.ParentId != 0)
+                {
+                    currentItem = userItems.Single(i => i.Id == currentItem.ParentId);
+                    todoList.Breadcrumbs.Insert(
+                        0,
+                        new Breadcrumb { Id = currentItem.Id, Label = currentItem.Label }
+                    );
+                }
             }
 
             foreach (var parent in parents)
@@ -31,24 +40,27 @@ public class TodoItemManager
 
                 foreach (var child in children)
                 {
-                    sublist.Add(new TodoChild
-                    {
-                        Id = child.Id,
-                        Label = child.Label,
-                        Status = child.Status,
-                        Expanded = child.Expanded
-                    });
+                    sublist.Add(
+                        new TodoChild
+                        {
+                            Id = child.Id,
+                            Label = child.Label,
+                            Status = child.Status,
+                            Expanded = child.Expanded
+                        }
+                    );
                 }
 
-                todoList.Items.Add(new TodoParent
-                {
-                    Id = parent.Id,
-                    Label = parent.Label,
-                    Status = parent.Status,
-                    Expanded = parent.Expanded,
-                    Children = sublist
-                });
-
+                todoList.Items.Add(
+                    new TodoParent
+                    {
+                        Id = parent.Id,
+                        Label = parent.Label,
+                        Status = parent.Status,
+                        Expanded = parent.Expanded,
+                        Children = sublist
+                    }
+                );
             }
 
             return todoList;
