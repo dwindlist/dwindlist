@@ -44,43 +44,43 @@
                 <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
             </div>
-                <div class="col-md-11 float-end">
-                    <div class="text-danger" role="alert" id="alert@(item.Id)"></div>
-                    <div class="form-group">
-                        <label for="new-item-label@(item.Id)">New Item:</label>
-                        <input type="text" class="form-control" id="new-item-label@(item.Id)">
-                        <button type="button" class="btn btn-primary add-item" id="add-item@(item.Id)" value="@item.Id">Add Item</button>
-                    </div>
+            <div class="col-md-11 float-end">
+                <div class="text-danger" role="alert" id="alert@(item.Id)"></div>
+                <div class="form-group">
+                    <label for="new-item-label@(item.Id)">New Item:</label>
+                    <input type="text" class="form-control" id="new-item-label@(item.Id)">
+                    <button type="button" class="btn btn-primary add-item" id="add-item@(item.Id)" value="@item.Id">Add Item</button>
+                </div>
                 @foreach(var subitem in item.Children)
                 {
-                    <div class="input-group mb-3" style="width: 100%;">
-                        <div class="input-group-prepend" style="width: 30px;">
-                            <div class="input-group-text">
-                                @if (subitem.Status == 'c')
-                                {
-                                <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" checked>
-                                }
-                                else
-                                {
-                                <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox">
-                                }
-                            </div>
+                <div class="input-group mb-3" style="width: 100%;">
+                    <div class="input-group-prepend" style="width: 30px;">
+                        <div class="input-group-text">
+                            @if (subitem.Status == 'c')
+                            {
+                            <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" checked>
+                            }
+                            else
+                            {
+                            <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox">
+                            }
                         </div>
-                        @if (subitem.Status == 'c')
-                        {
-                        <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
-                        }
-                        else
-                        {
-                        <input type="text" style="text-decoration: none;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
-                        }
-                        <a href="/TodoItem/Index/@(subitem.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button></a>
-                        <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
-                        <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
-                        <button class="btn btn-sm btn-danger">Delete</button>
                     </div>
-                }
+                    @if (subitem.Status == 'c')
+                    {
+                    <input type="text" style="text-decoration: line-through;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
+                    }
+                    else
+                    {
+                    <input type="text" style="text-decoration: none;" disabled="true" class="form-control" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
+                    }
+                    <a href="/TodoItem/Index/@(subitem.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button></a>
+                    <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
+                    <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
+                    <button class="btn btn-sm btn-danger">Delete</button>
                 </div>
+                }
+            </div>
             }
         </div>
 
