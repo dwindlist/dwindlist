@@ -51,6 +51,7 @@ namespace dwindlist.Controllers
 
             TodoItemManager todoItemManager = new();
             FilteredList filteredList = todoItemManager.SearchTodoList(userId, id);
+            filteredList.Label = "Search";
 
             return View("Filtered", filteredList);
         }
@@ -66,6 +67,7 @@ namespace dwindlist.Controllers
 
             TodoItemManager todoItemManager = new();
             FilteredList filteredList = todoItemManager.FilterTodoListByStatus(userId, true);
+            filteredList.Label = "Completed";
 
             return View("Filtered", filteredList);
         }
@@ -81,6 +83,7 @@ namespace dwindlist.Controllers
 
             TodoItemManager todoItemManager = new();
             FilteredList filteredList = todoItemManager.FilterTodoListByStatus(userId, false);
+            filteredList.Label = "Incomplete";
 
             return View("Filtered", filteredList);
         }
