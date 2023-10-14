@@ -20,8 +20,8 @@
                         <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
                     </div>
                 </div>
-                <input type="text" style="text-decoration: @(item.Status == 'c' ? "line-through" : "none");" disabled="true" class="form-control" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
-                <a href="/TodoItem/Index/@(item.Id)"><button class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button></a>
+                <input type="text" disabled="true" class="form-control @(item.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
+                <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button>
                 <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
                 <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
@@ -71,12 +71,14 @@
                 success: function (response) {
                     // Handle the API response as needed
                     console.log("Todo list item toggled successfully");
-                    window.location.reload();
+                    parentItem = $(`#parent-item${thisId}`);
+                    parentItem.prop("hidden", !parentItem.prop("hidden"));
+                    thisElement.text(thisElement.text() == ">" ? "v" : ">");
                 },
                 error: function (error) {
                     // Handle API error
                     console.error("Error adding toggling todo list item:", error);
-                    $(`#alert${thisId}`).text("An error occurred")
+                    $(`#alert${thisId}`).text("An error occurred");
                 }
             });
         });
@@ -84,9 +86,7 @@
         $(".toggle-status").click(function() {
             let thisElement = $(`#${$(this).attr("id")}`);
             let thisId = $(thisElement).val();
-
             thisElement.prop("disabled", true);
-            $(`#new-item-label${thisId}`).prop("disabled", true);
 
             $.ajax({
                 type: "PUT",
@@ -94,12 +94,13 @@
                 success: function (response) {
                     // Handle the API response as needed
                     console.log("Todo list item toggled successfully");
-                    window.location.reload();
+                    $(`#edit-item-label${thisId}`).toggleClass("text-decoration-line-through");
+                    thisElement.prop("disabled", false);
                 },
                 error: function (error) {
                     // Handle API error
                     console.error("Error adding toggling todo list item:", error);
-                    $(`#alert${thisId}`).text("An error occurred")
+                    $(`#alert${thisId}`).text("An error occurred");
                 }
             });
         });
@@ -131,7 +132,7 @@
                 error: function (error) {
                     // Handle API error
                     console.error("Error adding todo list item:", error);
-                    $(`#alert${thisId}`).text("An error occurred")
+                    $(`#alert${thisId}`).text("An error occurred");
                 }
             });
         });
@@ -147,7 +148,7 @@
         });
 
         $(".save-item").click(function() {
-            let thisElement = $(`#${$(this).attr("id")}`)
+            let thisElement = $(`#${$(this).attr("id")}`);
             let thisId = $(thisElement).val();
 
             thisElement.prop("disabled", true);
@@ -166,12 +167,15 @@
                 success: function (response) {
                     // Handle the API response as needed
                     console.log("Todo list item updated successfully");
-                    window.location.reload();
+                    $(`edit-item-label${thisId}`).text(response);
+                    thisElement.prop("disabled", false);
+                    thisElement.prop("hidden", true);
+                    $(`#edit-item${thisId}`).prop("hidden", false);
                 },
                 error: function (error) {
                     // Handle API error
                     console.error("Error updating todo list item:", error);
-                    $(`#alert${thisId}`).text("An error occurred")
+                    $(`#alert${thisId}`).text("An error occurred");
                 }
             });
         });

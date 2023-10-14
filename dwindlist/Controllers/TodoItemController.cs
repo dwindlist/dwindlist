@@ -169,7 +169,7 @@ namespace dwindlist.Controllers
             TodoItemManager todoItemManager = new();
             todoItemManager.UpdateItemLabel(userId, id, todoItemDto);
 
-            return Ok();
+            return Ok(todoItemDto.Label);
         }
     }
 }
