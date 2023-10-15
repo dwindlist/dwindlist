@@ -158,31 +158,41 @@ namespace dwindlist.Models.EntityManager
         }
     }
 
-    // TODO: Memoize breadcrumb manager
     internal class BreadcrumbManager
     {
+        private Dictionary<TodoItem, List<Breadcrumb>> Memo { get; set; } = new();
+
         public List<Breadcrumb> GetBreadcrumbs(IQueryable<TodoItem> list, int id)
         {
             List<Breadcrumb> breadcrumbs = new();
+
             if (id == 0)
             {
                 return breadcrumbs;
             }
 
             TodoItem currentItem = list.Single(i => i.Id == id);
+
             while (currentItem.Id != 0)
             {
-                breadcrumbs.Insert(
-                    0,
-                    new Breadcrumb { Id = currentItem.Id, Label = currentItem.Label }
-                );
+                if (Memo.ContainsKey(currentItem))
+                {
+                    breadcrumbs.AddRange(Memo[currentItem]);
+                    break;
+                }
+
+                breadcrumbs.Add(new Breadcrumb { Id = currentItem.Id, Label = currentItem.Label });
+                Memo.Add(currentItem, breadcrumbs);
+
                 if (currentItem.ParentId == 0)
                 {
                     break;
                 }
+
                 currentItem = list.Single(i => i.Id == currentItem.ParentId);
             }
 
+            breadcrumbs.Reverse();
             return breadcrumbs;
         }
     }
