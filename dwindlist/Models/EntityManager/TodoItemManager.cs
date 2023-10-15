@@ -13,20 +13,17 @@ namespace dwindlist.Models.EntityManager
             using ApplicationDbContext db = new();
             IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
             List<TodoItem> parents = userItems.Where(i => i.ParentId == rootId).ToList();
-            TodoList todoList = new() { RootId = (int)rootId };
+
+            TodoList todoList = new() { RootId = (int)rootId, };
 
             if (rootId != 0)
             {
                 TodoItem currentItem = userItems.Single(i => i.Id == rootId);
                 todoList.Label = currentItem.Label;
-                while (currentItem.ParentId != 0)
-                {
-                    currentItem = userItems.Single(i => i.Id == currentItem.ParentId);
-                    todoList.Breadcrumbs.Insert(
-                        0,
-                        new Breadcrumb { Id = currentItem.Id, Label = currentItem.Label }
-                    );
-                }
+                todoList.Breadcrumbs = new BreadcrumbManager().GetBreadcrumbs(
+                    userItems,
+                    currentItem.ParentId
+                );
             }
 
             foreach (TodoItem parent in parents)
@@ -142,7 +139,8 @@ namespace dwindlist.Models.EntityManager
 
             FilteredList filteredList = new();
 
-            // TODO: Breadcrumbs
+            BreadcrumbManager bm = new();
+
             foreach (TodoItem item in filteredItems)
             {
                 filteredList.Items.Add(
@@ -151,12 +149,41 @@ namespace dwindlist.Models.EntityManager
                         Id = item.Id,
                         Label = item.Label,
                         Status = item.Status,
-                        Breadcrumbs = new List<Breadcrumb>()
+                        Breadcrumbs = bm.GetBreadcrumbs(userItems, item.ParentId)
                     }
                 );
             }
 
             return filteredList;
+        }
+    }
+
+    // TODO: Memoize breadcrumb manager
+    internal class BreadcrumbManager
+    {
+        public List<Breadcrumb> GetBreadcrumbs(IQueryable<TodoItem> list, int id)
+        {
+            List<Breadcrumb> breadcrumbs = new();
+            if (id == 0)
+            {
+                return breadcrumbs;
+            }
+
+            TodoItem currentItem = list.Single(i => i.Id == id);
+            while (currentItem.Id != 0)
+            {
+                breadcrumbs.Insert(
+                    0,
+                    new Breadcrumb { Id = currentItem.Id, Label = currentItem.Label }
+                );
+                if (currentItem.ParentId == 0)
+                {
+                    break;
+                }
+                currentItem = list.Single(i => i.Id == currentItem.ParentId);
+            }
+
+            return breadcrumbs;
         }
     }
 }

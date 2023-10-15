@@ -4,9 +4,9 @@
 }
 
 <h1>dwindlist</h1>
-<div id="breadcrumbs">
-<a href="/TodoItem/Index">dwindlist</a>
-> @Model.Label
+<div class="breadcrumbs">
+  <a href="/TodoItem/Index">dwindlist</a>
+  > @Model.Label
 </div>
 
 <div class="container mt-4">
@@ -27,7 +27,13 @@
                 <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
                 <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
                 <button class="btn btn-sm btn-danger">Delete</button>
-                @*TODO: breadcrumbs*@
+            </div>
+            @*TODO: breadcrumbs*@
+            <div class="breadcrumbs">
+                @foreach (var breadcrumb in item.Breadcrumbs)
+                {
+                <span>></span> <a href="/TodoItem/Index/@(breadcrumb.Id)">@breadcrumb.Label</a>
+                }
             </div>
             }
         </div>

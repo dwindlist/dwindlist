@@ -4,14 +4,13 @@
 }
 
 <h1>dwindlist</h1>
-<div id="breadcrumbs">
-<a href="/TodoItem/Index">dwindlist</a>
-@foreach (var breadcrumb in Model.Breadcrumbs)
-{
-<span>></span> <a href="/TodoItem/Index/@(breadcrumb.Id)">@breadcrumb.Label</a>
-}
->
-@Model.Label
+<div class="breadcrumbs">
+    <a href="/TodoItem/Index">dwindlist</a>
+    @foreach (var breadcrumb in Model.Breadcrumbs)
+    {
+    <span>></span> <a href="/TodoItem/Index/@(breadcrumb.Id)">@breadcrumb.Label</a>
+    }
+    > @Model.Label
 </div>
 
 <div class="container mt-4">
