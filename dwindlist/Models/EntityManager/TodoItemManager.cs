@@ -192,8 +192,9 @@ namespace dwindlist.Models.EntityManager
                 currentItem = list.Single(i => i.Id == currentItem.ParentId);
             }
 
-            breadcrumbs.Reverse();
-            return breadcrumbs;
+            List<Breadcrumb> reversed = breadcrumbs.ToList();
+            reversed.Reverse();
+            return reversed;
         }
     }
 }
