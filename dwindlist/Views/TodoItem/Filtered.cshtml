@@ -11,7 +11,7 @@
 
 <div class="container mt-4">
     <div class="row">
-        @{Html.RenderPartial("_Navigation", Model.Label);}
+        @await Html.PartialAsync("_Navigation", Model.Label)
 
         <div id="todo-list">
             @foreach(var item in Model.Items)
