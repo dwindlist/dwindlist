@@ -64,12 +64,25 @@ namespace dwindlist.Models.EntityManager
 
         public FilteredList SearchTodoList(string userId, string pattern)
         {
-            return FilterTodoList(userId, pattern, new FilterSearch());
+            return FilterTodoList(
+                userId,
+                (list) =>
+                {
+                    return list.Where(i => i.Label.Contains(pattern)).ToList();
+                }
+            );
         }
 
         public FilteredList FilterTodoListByStatus(string userId, bool completed)
         {
-            return FilterTodoList(userId, completed ? "completed" : string.Empty, new FilterStatus());
+            return FilterTodoList(
+                userId,
+                (list) =>
+                {
+                    char status = completed ? 'c' : 'i';
+                    return list.Where(i => i.Status == status).ToList();
+                }
+            );
         }
 
         public void AddItem(string userId, int parentId, TodoItemDto todoItemDto)
@@ -118,11 +131,14 @@ namespace dwindlist.Models.EntityManager
             _ = db.SaveChanges();
         }
 
-        internal static FilteredList FilterTodoList(string userId, string pattern, IFilter filter)
+        private static FilteredList FilterTodoList(
+            string userId,
+            Func<IQueryable<TodoItem>, List<TodoItem>> filter
+        )
         {
             using ApplicationDbContext db = new();
             IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
-            List<TodoItem> filteredItems = filter.Filter(userItems, pattern);
+            List<TodoItem> filteredItems = filter(userItems);
 
             FilteredList filteredList = new();
 
@@ -141,28 +157,6 @@ namespace dwindlist.Models.EntityManager
             }
 
             return filteredList;
-        }
-    }
-
-    internal interface IFilter
-    {
-        public List<TodoItem> Filter(IQueryable<TodoItem> list, string pattern);
-    }
-
-    internal class FilterSearch : IFilter
-    {
-        public List<TodoItem> Filter(IQueryable<TodoItem> list, string pattern)
-        {
-            return list.Where(i => i.Label.Contains(pattern)).ToList();
-        }
-    }
-
-    internal class FilterStatus : IFilter
-    {
-        public List<TodoItem> Filter(IQueryable<TodoItem> list, string pattern)
-        {
-            char status = pattern == "completed" ? 'c' : 'i';
-            return list.Where(i => i.Status == status).ToList();
         }
     }
 }
