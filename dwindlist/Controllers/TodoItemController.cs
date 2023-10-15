@@ -51,7 +51,7 @@ namespace dwindlist.Controllers
 
             TodoItemManager todoItemManager = new();
             FilteredList filteredList = todoItemManager.SearchTodoList(userId, id);
-            filteredList.Label = "Search";
+            filteredList.Label = $"Search: {id}";
 
             return View("Filtered", filteredList);
         }
