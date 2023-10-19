@@ -11,8 +11,8 @@ namespace dwindlist.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserId { get; set; } = string.Empty;
-        public virtual IdentityUser User { get; set; } = new();
+        public string? UserId { get; set; }
+        public virtual IdentityUser? User { get; set; }
 
         [Required]
         [MaxLength(256), MinLength(1)]
