@@ -6,7 +6,7 @@ namespace dwindlist.Models.EntityManager
     {
         private Dictionary<TodoItem, List<Breadcrumb>> Memo { get; set; } = new();
 
-        public List<Breadcrumb> GetBreadcrumbs(IQueryable<TodoItem> list, int id)
+        public List<Breadcrumb> GetBreadcrumbs(List<TodoItem> list, int id)
         {
             List<Breadcrumb> breadcrumbs = new();
 

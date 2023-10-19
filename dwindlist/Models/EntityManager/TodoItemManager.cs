@@ -11,9 +11,11 @@ namespace dwindlist.Models.EntityManager
             rootId ??= 0;
 
             using ApplicationDbContext db = new();
-            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
-            List<TodoItem> parents = userItems.Where(i => i.ParentId == rootId).ToList();
+            List<TodoItem> userItems = db.TodoItem
+                .Where(i => i.UserId == userId)
+                .ToList();
 
+            List<TodoItem> parents = userItems.Where(i => i.ParentId == rootId).ToList();
             TodoList todoList = new() { RootId = (int)rootId, };
 
             if (rootId != 0)
@@ -130,15 +132,16 @@ namespace dwindlist.Models.EntityManager
 
         private static FilteredList FilterTodoList(
             string userId,
-            Func<IQueryable<TodoItem>, List<TodoItem>> filter
+            Func<List<TodoItem>, List<TodoItem>> filter
         )
         {
             using ApplicationDbContext db = new();
-            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            List<TodoItem> userItems = db.TodoItem
+                .Where(i => i.UserId == userId)
+                .ToList();
+
             List<TodoItem> filteredItems = filter(userItems);
-
             FilteredList filteredList = new();
-
             BreadcrumbManager bm = new();
 
             foreach (TodoItem item in filteredItems)
