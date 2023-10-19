@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace dwindlist.Models
 {
-    [Index("UserId")]
+    [Index(nameof(UserId), nameof(Active))]
     public class TodoItem
     {
         [Key]
@@ -20,5 +20,6 @@ namespace dwindlist.Models
         public int ParentId { get; set; }
         public char Status { get; set; } = 'i';
         public char Expanded { get; set; } = 'c';
+        public char Active { get; set; } = 'a';
     }
 }

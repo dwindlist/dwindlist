@@ -13,6 +13,7 @@ namespace dwindlist.Models.EntityManager
             using ApplicationDbContext db = new();
             List<TodoItem> userItems = db.TodoItem
                 .Where(i => i.UserId == userId)
+                .Where(i => i.Active == 'a')
                 .ToList();
 
             List<TodoItem> parents = userItems.Where(i => i.ParentId == rootId).ToList();
@@ -94,6 +95,7 @@ namespace dwindlist.Models.EntityManager
                     Label = todoItemDto.Label,
                     ParentId = parentId,
                     Status = 'i',
+                    Active = 'a',
                 };
 
             _ = db.TodoItem.Add(newItem);
@@ -103,7 +105,10 @@ namespace dwindlist.Models.EntityManager
         public void UpdateItemLabel(string userId, int itemId, TodoItemDto todoItemDto)
         {
             using ApplicationDbContext db = new();
-            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            IQueryable<TodoItem> userItems = db.TodoItem
+                .Where(i => i.UserId == userId)
+                .Where(i => i.Active == 'a');
+
             TodoItem item = userItems.Single(i => i.Id == itemId);
             item.Label = todoItemDto.Label;
 
@@ -113,7 +118,10 @@ namespace dwindlist.Models.EntityManager
         public void ToggleItemStatus(string userId, int itemId)
         {
             using ApplicationDbContext db = new();
-            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            IQueryable<TodoItem> userItems = db.TodoItem
+                .Where(i => i.UserId == userId)
+                .Where(i => i.Active == 'a');
+
             TodoItem item = userItems.Single(i => i.Id == itemId);
             item.Status = item.Status == 'i' ? 'c' : 'i';
 
@@ -123,9 +131,35 @@ namespace dwindlist.Models.EntityManager
         public void ToggleItemExpanded(string userId, int itemId)
         {
             using ApplicationDbContext db = new();
-            IQueryable<TodoItem> userItems = db.TodoItem.Where(i => i.UserId == userId);
+            IQueryable<TodoItem> userItems = db.TodoItem
+                .Where(i => i.UserId == userId)
+                .Where(i => i.Active == 'a');
+
             TodoItem item = userItems.Single(i => i.Id == itemId);
             item.Expanded = item.Expanded == 'c' ? 'e' : 'c';
+
+            _ = db.SaveChanges();
+        }
+
+        public void DeleteItem(string userId, int id)
+        {
+            using ApplicationDbContext db = new();
+            List<TodoItem> userItems = db.TodoItem
+                .Where(i => i.UserId == userId)
+                .Where(i => i.Active == 'a')
+                .ToList();
+
+            TodoItem item = userItems.Single(i => i.Id == id);
+            Queue<TodoItem> toDelete = new();
+            toDelete.Enqueue(item);
+
+            while (toDelete.Count > 0)
+            {
+                TodoItem currentItem = toDelete.Dequeue();
+                currentItem.Active = 'd';
+                int currentId = currentItem.Id;
+                userItems.Where(i => i.ParentId == currentId).ToList().ForEach(toDelete.Enqueue);
+            }
 
             _ = db.SaveChanges();
         }
@@ -138,6 +172,7 @@ namespace dwindlist.Models.EntityManager
             using ApplicationDbContext db = new();
             List<TodoItem> userItems = db.TodoItem
                 .Where(i => i.UserId == userId)
+                .Where(i => i.Active == 'a')
                 .ToList();
 
             List<TodoItem> filteredItems = filter(userItems);

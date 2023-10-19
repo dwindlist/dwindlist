@@ -17,7 +17,7 @@
     <div class="row">
         @await Html.PartialAsync("_Navigation", "All")
 
-        <div class="text-danger" role="alert" id="alert@(Model.RootId)"></div>
+        <div class="text-danger add-alert" role="alert" id="add-alert@(Model.RootId)"></div>
         <div class="form-group">
             <label for="new-item-label@(Model.RootId)">New Item:</label>
             <input type="text" class="form-control" id="new-item-label@(Model.RootId)">
@@ -27,7 +27,8 @@
         <div id="todo-list">
             @foreach(var item in Model.Items)
             {
-            <div class="input-group mb-3" style="width: 100%;">
+            <div class="text-danger custom-alert" role="alert" id="alert@(item.Id)"></div>
+            <div class="input-group mb-3 todo-item@(item.Id)" style="width: 100%;">
                 <div class="input-group-prepend" style="width: 30px;">
                     <div class="input-group-text">
                         <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
@@ -37,11 +38,12 @@
                 <button class="btn btn-sm btn-secondary toggle-expand" id="toggle-expand@(item.Id)" value="@item.Id">@(item.Expanded == 'c' ? ">" : "V")</button>
                 <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button>
                 <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
+                <button class="btn btn-sm btn-secondary cancel-item" id="cancel-item@(item.Id)" value="@item.Id" hidden>Cancel</button>
                 <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
-                <button class="btn btn-sm btn-danger">Delete</button>
+                <button class="btn btn-sm btn-danger delete-item" id="delete-item@(item.Id)" value="@item.Id">Delete</button>
             </div>
-            <div class="col-md-11 float-end parent-item" id="parent-item@(item.Id)" @(item.Expanded == 'c' ? "hidden" : "")>
-                <div class="text-danger" role="alert" id="alert@(item.Id)"></div>
+            <div class="col-md-11 float-end todo-item@(item.Id) parent-item" id="parent-item@(item.Id)" @(item.Expanded == 'c' ? "hidden" : "")>
+                <div class="text-danger add-alert" role="alert" id="add-alert@(item.Id)"></div>
                 <div class="form-group">
                     <label for="new-item-label@(item.Id)">New Item:</label>
                     <input type="text" class="form-control" id="new-item-label@(item.Id)">
@@ -49,6 +51,7 @@
                 </div>
                 @foreach(var subitem in item.Children)
                 {
+                <div class="text-danger custom-alert" role="alert" id="alert@(subitem.Id)"></div>
                 <div class="input-group mb-3" style="width: 100%;">
                     <div class="input-group-prepend" style="width: 30px;">
                         <div class="input-group-text">
@@ -58,12 +61,37 @@
                     <input type="text" disabled="true" class="form-control @(subitem.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
                     <button onclick="window.location.href='/TodoItem/Index/@(subitem.Id)'" class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button>
                     <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
+                    <button class="btn btn-sm btn-secondary cancel-item" id="cancel-item@(subitem.Id)" value="@subitem.Id" hidden>Cancel</button>
                     <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
-                    <button class="btn btn-sm btn-danger">Delete</button>
+                    <button class="btn btn-sm btn-danger delete-item" id="delete-item@(subitem.Id)" value="@subitem.Id">Delete</button>
                 </div>
                 }
             </div>
             }
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Confirm Deletion</h5>
+                    <button type="button" class="close cancel-delete" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Are you sure you want to delete "<span id="delete-modal-name"></span>"?
+                    </p>
+                    <p>
+                        It and all its children will be permanently removed from your list!
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary cancel-delete">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete" value="">Delete</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

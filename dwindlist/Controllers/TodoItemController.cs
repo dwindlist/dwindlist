@@ -161,5 +161,21 @@ namespace dwindlist.Controllers
 
             return Ok(todoItemDto.Label);
         }
+
+        [Authorize]
+        [HttpPut]
+        public ActionResult Delete(int id)
+        {
+            string? userId = GetUserId(User.Identity as ClaimsIdentity);
+            if (userId == null)
+            {
+                return BadRequest();
+            }
+
+            TodoItemManager todoItemManager = new();
+            todoItemManager.DeleteItem(userId, id);
+
+            return Ok();
+        }
     }
 }
