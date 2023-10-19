@@ -113,11 +113,6 @@ namespace dwindlist.Controllers
         [HttpPut]
         public ActionResult ToggleStatus(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
@@ -134,11 +129,6 @@ namespace dwindlist.Controllers
         [HttpPut]
         public ActionResult ToggleExpanded(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
