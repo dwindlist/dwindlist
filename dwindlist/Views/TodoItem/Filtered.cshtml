@@ -18,10 +18,8 @@
             {
             <div class="text-danger custom-alert" role="alert" id="alert@(item.Id)"></div>
             <div class="input-group mb-3 filtered-item@(item.Id)" style="width: 100%;">
-                <div class="input-group-prepend" style="width: 30px;">
-                    <div class="input-group-text">
-                        <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
-                    </div>
+                <div class="input-group-text">
+                    <input class="toggle-status" type="checkbox" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
                 </div>
                 <input type="text" disabled="true" class="form-control @(item.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
                 <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button>
