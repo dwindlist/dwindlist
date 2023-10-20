@@ -19,20 +19,22 @@
 
         <div class="text-danger add-alert" role="alert" id="add-alert@(Model.RootId)"></div>
         <div class="form-group">
-            <label for="new-item-label@(Model.RootId)">New Item:</label>
-            <input type="text" class="form-control" id="new-item-label@(Model.RootId)">
-            <button type="button" class="btn btn-primary add-item" id="add-item@(Model.RootId)" value="@Model.RootId">Add Item</button>
+            <label class="pt-2" for="new-item-label@(Model.RootId)">New Item:</label>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="new-item-label@(Model.RootId)">
+                <div class="input-group-append">
+                    <button class="btn btn-primary add-item" type="button" id="add-item@(Model.RootId)" value="@Model.RootId">Add Item</button>
+                </div>
+            </div>
         </div>
 
         <div id="todo-list">
             @foreach(var item in Model.Items)
             {
             <div class="text-danger custom-alert" role="alert" id="alert@(item.Id)"></div>
-            <div class="input-group mb-3 todo-item@(item.Id)" style="width: 100%;">
-                <div class="input-group-prepend" style="width: 30px;">
-                    <div class="input-group-text">
-                        <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
-                    </div>
+            <div class="input-group mb-3 pt-2 todo-item@(item.Id)" style="width: 100%;">
+                <div class="input-group-text">
+                    <input class="toggle-status" type="checkbox" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
                 </div>
                 <input type="text" disabled="true" class="form-control @(item.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
                 <button class="btn btn-sm btn-secondary toggle-expand" id="toggle-expand@(item.Id)" value="@item.Id">@(item.Expanded == 'c' ? ">" : "V")</button>
@@ -44,19 +46,22 @@
             </div>
             <div class="col-md-11 float-end todo-item@(item.Id) parent-item" id="parent-item@(item.Id)" @(item.Expanded == 'c' ? "hidden" : "")>
                 <div class="text-danger add-alert" role="alert" id="add-alert@(item.Id)"></div>
-                <div class="form-group">
-                    <label for="new-item-label@(item.Id)">New Item:</label>
-                    <input type="text" class="form-control" id="new-item-label@(item.Id)">
-                    <button type="button" class="btn btn-primary add-item" id="add-item@(item.Id)" value="@item.Id">Add Item</button>
-                </div>
+                    <div class="form-group">
+                        <label class="pt-2" for="new-item-label@(item.Id)">New Item:</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="new-item-label@(item.Id)">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary add-item" type="button" id="add-item@(item.Id)" value="@item.Id">Add Item</button>
+                            </div>
+                        </div>
+                    </div>
+                    
                 @foreach(var subitem in item.Children)
                 {
                 <div class="text-danger custom-alert" role="alert" id="alert@(subitem.Id)"></div>
-                <div class="input-group mb-3" style="width: 100%;">
-                    <div class="input-group-prepend" style="width: 30px;">
-                        <div class="input-group-text">
-                            <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" @(subitem.Status == 'c' ? "checked" : "")>
-                        </div>
+                <div class="input-group mb-3 pt-2" style="width: 100%;">
+                    <div class="input-group-text">
+                        <input class="toggle-status" type="checkbox" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
                     </div>
                     <input type="text" disabled="true" class="form-control @(subitem.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
                     <button onclick="window.location.href='/TodoItem/Index/@(subitem.Id)'" class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button>
@@ -74,16 +79,16 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLongTitle">Confirm Deletion</h5>
+                    <h5 class="modal-title text-dark" id="exampleModalLongTitle">Confirm Deletion</h5>
                     <button type="button" class="close cancel-delete" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>
-                        Are you sure you want to delete "<span id="delete-modal-name"></span>"?
+                    <p class="text-dark">
+                        Are you sure you want to delete "<span class="text-dark" id="delete-modal-name"></span>"?
                     </p>
-                    <p>
+                    <p class="text-dark">
                         It and all its children will be permanently removed from your list!
                     </p>
                 </div>
