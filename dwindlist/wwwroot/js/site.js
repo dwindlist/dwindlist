@@ -12,7 +12,9 @@ $(document).ready(function () {
     const emptyError = "Label can't be empty."
 
     $("#search-box-confirm").click(function(){
-        window.location.replace(`/TodoItem/Search/${$("#search-box").val()}`);
+				let searchBoxVal = $("#search-box").val();
+				if (searchBoxVal === "") { return; }
+        window.location.replace(`/TodoItem/Search/${searchBoxVal}`);
     });
 
     $(".toggle-expand").click(function() {
@@ -202,6 +204,7 @@ $(document).ready(function () {
         let thisElement = $(this);
         let thisId = $(thisElement).val();
 
+				console.log(`Deleting: ${thisId}`);
         thisElement.prop("disabled", true);
 
         let userData = {

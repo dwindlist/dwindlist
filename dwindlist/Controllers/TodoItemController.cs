@@ -49,6 +49,11 @@ namespace dwindlist.Controllers
                 return BadRequest();
             }
 
+            if (id == null)
+            {
+                return Redirect("/");
+            }
+
             TodoItemManager todoItemManager = new();
             FilteredList filteredList = todoItemManager.SearchTodoList(userId, id);
             filteredList.Label = $"Search: {id}";
@@ -92,15 +97,15 @@ namespace dwindlist.Controllers
         [HttpPost]
         public ActionResult Add(int id, [FromBody] TodoItemDto todoItemDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
                 return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
 
             TodoItemManager todoItemManager = new();
@@ -145,15 +150,15 @@ namespace dwindlist.Controllers
         [HttpPut]
         public ActionResult UpdateLabel(int id, [FromBody] TodoItemDto todoItemDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
                 return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
 
             TodoItemManager todoItemManager = new();
