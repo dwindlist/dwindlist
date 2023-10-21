@@ -13,8 +13,8 @@ $(document).ready(function () {
     const longError = "Label is too long."
 
     $("#search-box-confirm").click(function(){
-				let searchBoxVal = $("#search-box").val();
-				if (searchBoxVal === "") { return; }
+        let searchBoxVal = $("#search-box").val();
+        if (searchBoxVal === "") { return; }
         window.location.replace(`/TodoItem/Search/${searchBoxVal}`);
     });
 
@@ -219,7 +219,7 @@ $(document).ready(function () {
         let thisElement = $(this);
         let thisId = $(thisElement).val();
 
-				console.log(`Deleting: ${thisId}`);
+        console.log(`Deleting: ${thisId}`);
         thisElement.prop("disabled", true);
 
         let userData = {
