@@ -55,20 +55,21 @@
                             </div>
                         </div>
                     </div>
-                    
                 @foreach(var subitem in item.Children)
                 {
-                <div class="text-danger custom-alert" role="alert" id="alert@(subitem.Id)"></div>
-                <div class="input-group mb-3 pt-2" style="width: 100%;">
-                    <div class="input-group-text">
-                        <input class="toggle-status" type="checkbox" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
-                    </div>
+                <div class=todo-item@(subitem.Id)>
+                    <div class="text-danger custom-alert" role="alert" id="alert@(subitem.Id)"></div>
+                    <div class="input-group mb-3 pt-2" style="width: 100%;">
+                        <div class="input-group-text">
+                            <input class="toggle-status" type="checkbox" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
+                        </div>
                     <input type="text" disabled="true" class="form-control @(subitem.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
                     <button onclick="window.location.href='/TodoItem/Index/@(subitem.Id)'" class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button>
                     <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
                     <button class="btn btn-sm btn-secondary cancel-item" id="cancel-item@(subitem.Id)" value="@subitem.Id" hidden>Cancel</button>
                     <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
                     <button class="btn btn-sm btn-danger delete-item" id="delete-item@(subitem.Id)" value="@subitem.Id">Delete</button>
+                    </div>
                 </div>
                 }
             </div>
