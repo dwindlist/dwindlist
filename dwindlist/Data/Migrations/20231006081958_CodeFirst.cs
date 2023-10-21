@@ -17,7 +17,7 @@ namespace dwindlist.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    Label = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Label = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     ParentId = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     Status = table.Column<string>(type: "nvarchar(1)", nullable: false, defaultValue: 'i')
                 },
