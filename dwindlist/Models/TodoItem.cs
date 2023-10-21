@@ -15,7 +15,7 @@ namespace dwindlist.Models
         public virtual IdentityUser? User { get; set; }
 
         [Required]
-        [MaxLength(256), MinLength(1)]
+        [MaxLength(64), MinLength(1)]
         public string Label { get; set; } = string.Empty;
         public int ParentId { get; set; }
         public char Status { get; set; } = 'i';

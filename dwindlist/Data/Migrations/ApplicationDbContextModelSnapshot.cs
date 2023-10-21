@@ -260,7 +260,7 @@ namespace dwindlist.Data.Migrations
 
                     b.HasIndex("UserId", "Active");
 
-                    b.ToTable("TodoItem");
+                    b.ToTable("TodoItem", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

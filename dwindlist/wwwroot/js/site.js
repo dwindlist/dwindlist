@@ -10,6 +10,7 @@ $(document).ready(function () {
 
     const genericError = "An error occurred. Please reload the page if the problem persists."
     const emptyError = "Label can't be empty."
+    const longError = "Label is too long."
 
     $("#search-box-confirm").click(function(){
         let searchBoxVal = $("#search-box").val();
@@ -73,16 +74,22 @@ $(document).ready(function () {
         let thisElement = $(`#${$(this).attr("id")}`);
         let thisId = $(thisElement).val();
 
-        thisElement.prop("disabled", true);
+        let trimmedInput = $(`#new-item-label${thisId}`).val().trim();
 
-        if ($(`#new-item-label${thisId}`).val() === "") {
+        if (trimmedInput.length < 1) {
             $(`#add-alert${thisId}`).text(emptyError);
-            thisElement.prop("disabled", false);
             return;
         }
 
+        if (trimmedInput.length > 64) {
+            $(`#add-alert${thisId}`).text(longError);
+            return;
+        }
+
+        thisElement.prop("disabled", true);
+
         let userData = {
-            Label: $(`#new-item-label${thisId}`).val(),
+            Label: trimmedInput,
             ParentId: thisId,
             Status: 'i'
         };
@@ -123,12 +130,16 @@ $(document).ready(function () {
         resetErrors();
         let thisElement = $(`#${$(this).attr("id")}`);
         let thisId = $(thisElement).val();
+        let thisEdit = $(`#edit-item${thisId}`);
+        let thisLabel = $(`#edit-item-label${thisId}`);
 
-        thisElement.prop("hidden", true);
+        thisLabel.val($(`#edit-item${thisId}`).val());
+        thisEdit.val(thisId);
+
         $(`#save-item${thisId}`).prop("hidden", true);
-
-        $(`#edit-item${thisId}`).prop("hidden", false);
-        $(`#edit-item-label${thisId}`).prop("disabled", true);
+        thisElement.prop("hidden", true);
+        thisEdit.prop("hidden", false);
+        thisLabel.prop("disabled", true);
     });
 
     $(".save-item").click(function() {
@@ -136,21 +147,25 @@ $(document).ready(function () {
         let thisElement = $(`#${$(this).attr("id")}`);
         let thisId = $(thisElement).val();
 
-        thisLabel = $(`#edit-item-label${thisId}`);
-        thisLabel.prop("disabled", true);
+        let thisLabel = $(`#edit-item-label${thisId}`);
+        let trimmedInput = thisLabel.val().trim();
 
-        if (thisLabel.val() === "") {
+        if (trimmedInput.length < 1) {
             $(`#alert${thisId}`).text(emptyError);
-            $(`#edit-item-label${thisId}`).val($(`#edit-item${thisId}`).val());
-            thisElement.prop("hidden", true);
-            $(`#cancel-item${thisId}`).prop("hidden", true);
-            $(`#edit-item${thisId}`).prop("hidden", false);
-
+            $thisLabel.val($(`#edit-item${thisId}`).val());
             return;
         }
 
+        if (trimmedInput.length > 64) {
+            $(`#alert${thisId}`).text(longError);
+            $thisLabel.val($(`#edit-item${thisId}`).val());
+            return;
+        }
+
+        thisLabel.prop("disabled", true);
+
         let userData = {
-            Label: thisLabel.val()
+            Label: trimmedInput
         };
 
         $.ajax({
