@@ -19,7 +19,7 @@
 
         <div class="text-danger add-alert" role="alert" id="add-alert@(Model.RootId)"></div>
         <div class="form-group">
-            <label class="pt-2" for="new-item-label@(Model.RootId)">New Item:</label>
+            <label class="pt-2" for="new-item-label@(Model.RootId)">New Task:</label>
             <div class="input-group mb-3">
                 <input type="text" class="form-control" id="new-item-label@(Model.RootId)">
                 <div class="input-group-append">
@@ -47,7 +47,7 @@
             <div class="col-md-11 float-end todo-item@(item.Id) parent-item" id="parent-item@(item.Id)" @(item.Expanded == 'c' ? "hidden" : "")>
                 <div class="text-danger add-alert" role="alert" id="add-alert@(item.Id)"></div>
                     <div class="form-group">
-                        <label class="pt-2" for="new-item-label@(item.Id)">New Item:</label>
+                        <label class="pt-2" for="new-item-label@(item.Id)">New Sub-task:</label>
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" id="new-item-label@(item.Id)">
                             <div class="input-group-append">
