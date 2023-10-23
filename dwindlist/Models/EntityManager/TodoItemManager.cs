@@ -115,19 +115,6 @@ namespace dwindlist.Models.EntityManager
             _ = db.SaveChanges();
         }
 
-        public void ToggleItemStatus(string userId, int itemId)
-        {
-            using ApplicationDbContext db = new();
-            IQueryable<TodoItem> userItems = db.TodoItem
-                .Where(i => i.UserId == userId)
-                .Where(i => i.Active == 'a');
-
-            TodoItem item = userItems.Single(i => i.Id == itemId);
-            item.Status = item.Status == 'i' ? 'c' : 'i';
-
-            _ = db.SaveChanges();
-        }
-
         public void ToggleItemExpanded(string userId, int itemId)
         {
             using ApplicationDbContext db = new();
@@ -141,6 +128,55 @@ namespace dwindlist.Models.EntityManager
             _ = db.SaveChanges();
         }
 
+        public void ToggleItemStatus(string userId, int itemId)
+        {
+            using ApplicationDbContext db = new();
+            List<TodoItem> userItems = db.TodoItem
+                .Where(i => i.UserId == userId)
+                .Where(i => i.Active == 'a')
+                .ToList();
+
+            TodoItem item = userItems.Single(i => i.Id == itemId);
+            char status = item.Status == 'i' ? 'c' : 'i';
+
+            Recurse(item, userItems, i => i.Status = status);
+
+            if (item.ParentId == 0)
+            {
+                _ = db.SaveChanges();
+                return;
+            }
+
+            // Make parent incomplete if we toggled an item incomplete
+            TodoItem parent = userItems.Single(i => i.Id == item.ParentId);
+            if (status == 'i')
+            {
+                parent.Status = 'i';
+                _ = db.SaveChanges();
+                return;
+            }
+
+            // Complete parent if all children are complete
+            List<TodoItem> children = userItems.Where(i => i.ParentId == item.ParentId).ToList();
+
+            bool shouldCompleteParent = true;
+            foreach (TodoItem child in children)
+            {
+                if (child.Status == 'i')
+                {
+                    shouldCompleteParent = false;
+                    break;
+                }
+            }
+
+            if (shouldCompleteParent)
+            {
+                parent.Status = 'c';
+            }
+
+            _ = db.SaveChanges();
+        }
+
         public void DeleteItem(string userId, int id)
         {
             using ApplicationDbContext db = new();
@@ -150,16 +186,7 @@ namespace dwindlist.Models.EntityManager
                 .ToList();
 
             TodoItem item = userItems.Single(i => i.Id == id);
-            Queue<TodoItem> toDelete = new();
-            toDelete.Enqueue(item);
-
-            while (toDelete.Count > 0)
-            {
-                TodoItem currentItem = toDelete.Dequeue();
-                currentItem.Active = 'd';
-                int currentId = currentItem.Id;
-                userItems.Where(i => i.ParentId == currentId).ToList().ForEach(toDelete.Enqueue);
-            }
+            Recurse(item, userItems, i => i.Active = 'd');
 
             _ = db.SaveChanges();
         }
@@ -193,6 +220,20 @@ namespace dwindlist.Models.EntityManager
             }
 
             return filteredList;
+        }
+
+        private static void Recurse(TodoItem item, List<TodoItem> list, Action<TodoItem> operation)
+        {
+            Queue<TodoItem> queue = new();
+            queue.Enqueue(item);
+
+            while (queue.Count > 0)
+            {
+                TodoItem currentItem = queue.Dequeue();
+                operation(currentItem);
+                int currentId = currentItem.Id;
+                list.Where(i => i.ParentId == currentId).ToList().ForEach(queue.Enqueue);
+            }
         }
     }
 }
