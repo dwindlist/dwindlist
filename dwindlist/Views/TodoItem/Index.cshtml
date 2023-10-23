@@ -31,7 +31,7 @@
         <div id="todo-list">
             @foreach(var item in Model.Items)
             {
-            <div class="todo-item" data-item-id="@item.Id">
+            <div class="todo-item" data-item-id="@item.Id" data-item-type="parent">
                 <div class="text-danger custom-alert" role="alert"></div>
                 <div class="input-group mb-3 pt-2" style="width: 100%;">
                     <div class="input-group-text">
