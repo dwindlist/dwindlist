@@ -86,12 +86,38 @@ $(document).ready(function () {
             success: function (response) {
                 // Handle the API response as needed
                 console.log("Todo list item toggled successfully");
+                console.log(response);;
                 if (related.type == "filtered") {
                     related.item.remove();
                     return;
                 };
-                related.label.toggleClass("text-decoration-line-through");
+
                 thisElement.prop("disabled", false);
+
+                if (related.type == "parent") {
+                // check all children of a parent
+                    const checked = thisElement.prop("checked");
+                    related.item.find(".status-checkbox").prop("checked", checked);
+
+                    if (checked) {
+                        related.item.find(".item-label").addClass("text-decoration-line-through");
+                    } else {
+                        related.item.find(".item-label").removeClass("text-decoration-line-through");
+                    }
+                } else {
+                    // check parent if all children are checked
+                    const parentObj = related.item.parents(".todo-item");
+                    const parent = getRelatedObjects(parentObj);
+
+                    if (response == 'c'){
+                        parent.status.prop("checked", true);
+                        parent.label.addClass("text-decoration-line-through");
+                    } else {
+                        parent.status.prop("checked", false);
+                        parent.label.removeClass("text-decoration-line-through");
+                    }
+                }
+
             },
             error: function (error) {
                 // Handle API error

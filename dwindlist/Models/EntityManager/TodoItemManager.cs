@@ -128,7 +128,7 @@ namespace dwindlist.Models.EntityManager
             _ = db.SaveChanges();
         }
 
-        public void ToggleItemStatus(string userId, int itemId)
+        public char ToggleItemStatus(string userId, int itemId)
         {
             using ApplicationDbContext db = new();
             List<TodoItem> userItems = db.TodoItem
@@ -144,7 +144,7 @@ namespace dwindlist.Models.EntityManager
             if (item.ParentId == 0)
             {
                 _ = db.SaveChanges();
-                return;
+                return 'i';
             }
 
             // Make parent incomplete if we toggled an item incomplete
@@ -153,7 +153,7 @@ namespace dwindlist.Models.EntityManager
             {
                 parent.Status = 'i';
                 _ = db.SaveChanges();
-                return;
+                return 'i';
             }
 
             // Complete parent if all children are complete
@@ -175,6 +175,7 @@ namespace dwindlist.Models.EntityManager
             }
 
             _ = db.SaveChanges();
+            return parent.Status;
         }
 
         public void DeleteItem(string userId, int id)
