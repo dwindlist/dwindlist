@@ -99,6 +99,12 @@ namespace dwindlist.Models.EntityManager
                 };
 
             _ = db.TodoItem.Add(newItem);
+            List<TodoItem> userItems = db.TodoItem
+                .Where(i => i.UserId == userId)
+                .Where(i => i.Active == 'a')
+                .ToList();
+
+            _ = RecursiveUpdateParentStatus(newItem, userItems);
             _ = db.SaveChanges();
         }
 
@@ -128,7 +134,7 @@ namespace dwindlist.Models.EntityManager
             _ = db.SaveChanges();
         }
 
-        public char ToggleItemStatus(string userId, int itemId)
+        public bool ToggleItemStatus(string userId, int itemId)
         {
             using ApplicationDbContext db = new();
             List<TodoItem> userItems = db.TodoItem
@@ -140,42 +146,9 @@ namespace dwindlist.Models.EntityManager
             char status = item.Status == 'i' ? 'c' : 'i';
 
             Recurse(item, userItems, i => i.Status = status);
-
-            if (item.ParentId == 0)
-            {
-                _ = db.SaveChanges();
-                return 'i';
-            }
-
-            // Make parent incomplete if we toggled an item incomplete
-            TodoItem parent = userItems.Single(i => i.Id == item.ParentId);
-            if (status == 'i')
-            {
-                parent.Status = 'i';
-                _ = db.SaveChanges();
-                return 'i';
-            }
-
-            // Complete parent if all children are complete
-            List<TodoItem> children = userItems.Where(i => i.ParentId == item.ParentId).ToList();
-
-            bool shouldCompleteParent = true;
-            foreach (TodoItem child in children)
-            {
-                if (child.Status == 'i')
-                {
-                    shouldCompleteParent = false;
-                    break;
-                }
-            }
-
-            if (shouldCompleteParent)
-            {
-                parent.Status = 'c';
-            }
-
+            bool shouldUpdateParent = RecursiveUpdateParentStatus(item, userItems);
             _ = db.SaveChanges();
-            return parent.Status;
+            return shouldUpdateParent;
         }
 
         public void DeleteItem(string userId, int id)
@@ -235,6 +208,75 @@ namespace dwindlist.Models.EntityManager
                 int currentId = currentItem.Id;
                 list.Where(i => i.ParentId == currentId).ToList().ForEach(queue.Enqueue);
             }
+        }
+
+        private static bool RecursiveUpdateParentStatus(
+            TodoItem item,
+            List<TodoItem> userItems
+        )
+        {
+            bool val = UpdateParentStatus(item, userItems);
+            if (item.ParentId == 0)
+            {
+                return val;
+            }
+
+            TodoItem currentItem = userItems.Single(i => i.Id == item.ParentId);
+            bool shouldUpdateParent = true;
+            while (shouldUpdateParent && currentItem.ParentId > 0)
+            {
+                shouldUpdateParent = UpdateParentStatus(currentItem, userItems);
+                if (!shouldUpdateParent || currentItem.ParentId == 0)
+                {
+                    break;
+                }
+                currentItem = userItems.Single(i => i.Id == currentItem.ParentId);
+            }
+
+            return val;
+        }
+
+        private static bool UpdateParentStatus(
+            TodoItem item,
+            List<TodoItem> userItems
+        )
+        {
+            bool shouldUpdateParent = false;
+            if (item.ParentId == 0)
+            {
+                return shouldUpdateParent;
+            }
+
+            // Make parent incomplete if we toggled an item incomplete
+            TodoItem parent = userItems.Single(i => i.Id == item.ParentId);
+            char initParentStatus = parent.Status;
+            if (item.Status == 'i')
+            {
+                parent.Status = 'i';
+                shouldUpdateParent = item.Status != initParentStatus;
+                return shouldUpdateParent;
+            }
+
+            // Complete parent if all children are complete
+            List<TodoItem> children = userItems.Where(i => i.ParentId == item.ParentId).ToList();
+
+            bool shouldCompleteParent = true;
+            foreach (TodoItem child in children)
+            {
+                if (child.Status == 'i')
+                {
+                    shouldCompleteParent = false;
+                    break;
+                }
+            }
+
+            if (shouldCompleteParent)
+            {
+                parent.Status = 'c';
+            }
+
+            shouldUpdateParent = shouldCompleteParent && initParentStatus == 'i';
+            return shouldUpdateParent;
         }
     }
 }
