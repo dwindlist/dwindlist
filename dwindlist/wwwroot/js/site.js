@@ -13,90 +13,124 @@ $(document).ready(function () {
     const longError = "Label is too long."
 
     $("#search-box-confirm").click(function(){
-        let searchBoxVal = $("#search-box").val();
+        const searchBoxVal = $("#search-box").val();
         if (searchBoxVal === "") { return; }
         window.location.replace(`/TodoItem/Search/${searchBoxVal}`);
     });
 
-    $(".toggle-expand").click(function() {
+    function getRelatedObjects(obj) {
+        const thisItem = obj.closest(".todo-item");
+        const id = thisItem.data("item-id");
+        return {
+            item: thisItem,
+            id: id,
+            type: thisItem.data("item-type"),
+            status: thisItem.find(".status-checkbox").eq(0),
+            label: thisItem.find(".item-label").eq(0),
+            expand: thisItem.find(".item-label").eq(0),
+            edit: thisItem.find(".edit-button").eq(0),
+            cancel: thisItem.find(".cancel-button").eq(0),
+            save: thisItem.find(".save-button").eq(0),
+            delete: thisItem.find(".delete-button").eq(0),
+            alert: thisItem.find(".custom-alert").eq(0),
+            sublist: $(`*[data-parent-id="${id}"]`).eq(0)
+        }
+    }
+
+    function getRelatedAddObjects(obj){
+        const thisItem = obj.closest(".add-form");
+        const id = thisItem.data("item-id");
+        return {
+            item: thisItem,
+            id: id,
+            label: thisItem.find(".item-label"),
+            alert: thisItem.find(".add-alert"),
+        }
+    }
+
+    $(".expand-button").click(function() {
         resetErrors();
-        let thisElement = $(`#${$(this).attr("id")}`);
-        let thisId = $(thisElement).val();
+        const thisElement = $(this);
+        const related = getRelatedObjects(thisElement);
+
         thisElement.prop("disabled", true);
 
         $.ajax({
             type: "PUT",
-            url: `/todoitem/toggleexpanded/${thisId}`,
+            url: `/todoitem/toggleexpanded/${related.id}`,
             success: function (response) {
                 // Handle the API response as needed
                 console.log("Todo list item toggled successfully");
-                parentItem = $(`#parent-item${thisId}`);
-                parentItem.prop("hidden", !parentItem.prop("hidden"));
+                related.sublist.prop("hidden", !related.sublist.prop("hidden"));
                 thisElement.text(thisElement.text() == ">" ? "v" : ">");
                 thisElement.prop("disabled", false);
             },
             error: function (error) {
                 // Handle API error
-                console.error("Error adding toggling todo list item:", error);
-                $(`#alert${thisId}`).text(genericError);
+                console.error("Error toggling todo list item:", error);
+                related.alert.eq(0).text(genericError);
                 thisElement.prop("disabled", false);
             }
         });
     });
 
-    $(".toggle-status").click(function() {
+    $(".status-checkbox").click(function() {
         resetErrors();
-        let thisElement = $(`#${$(this).attr("id")}`);
-        let thisId = $(thisElement).val();
+        const thisElement = $(this);
+        const related = getRelatedObjects(thisElement);
         thisElement.prop("disabled", true);
 
         $.ajax({
             type: "PUT",
-            url: `/todoitem/togglestatus/${thisId}`,
+            url: `/todoitem/togglestatus/${related.id}`,
             success: function (response) {
                 // Handle the API response as needed
                 console.log("Todo list item toggled successfully");
-                $(`#edit-item-label${thisId}`).toggleClass("text-decoration-line-through");
+                if (related.type == "filtered") {
+                    related.item.remove();
+                    return;
+                };
+                related.label.toggleClass("text-decoration-line-through");
                 thisElement.prop("disabled", false);
-                $(`.filtered-item${thisId}`).remove();
             },
             error: function (error) {
                 // Handle API error
                 console.error("Error adding toggling todo list item:", error);
-                $(`#alert${thisId}`).text(genericError);
+                related.alert.text(genericError);
                 thisElement.prop("disabled", false);
             }
         });
     });
 
-    $(".add-item").click(function () {
+    $(".add-button").click(function () {
         resetErrors();
-        let thisElement = $(`#${$(this).attr("id")}`);
-        let thisId = $(thisElement).val();
+        const thisElement = $(this);
+        const related = getRelatedAddObjects(thisElement);
+        console.log(`Adding to item ${related.id}`);
 
-        let trimmedInput = $(`#new-item-label${thisId}`).val().trim();
+        let trimmedInput = related.label.val().trim();
 
         if (trimmedInput.length < 1) {
-            $(`#add-alert${thisId}`).text(emptyError);
+            related.alert.text(emptyError);
             return;
         }
 
         if (trimmedInput.length > 64) {
-            $(`#add-alert${thisId}`).text(longError);
+            related.alert.text(longError);
             return;
         }
 
         thisElement.prop("disabled", true);
 
-        let userData = {
+        const userData = {
             Label: trimmedInput,
-            ParentId: thisId,
+            ParentId: related.id,
             Status: 'i'
         };
 
         $.ajax({
             type: "POST",
-            url: `/todoitem/add/${thisId}`,
+            url: `/todoitem/add/${related.id}`,
             data: JSON.stringify(userData),
             contentType: "application/json; charset=utf-8",
             success: function (response) {
@@ -107,107 +141,101 @@ $(document).ready(function () {
             error: function (error) {
                 // Handle API error
                 console.error("Error adding todo list item:", error);
-                $(`#add-alert${thisId}`).text(genericError);
+                related.alert.text(genericError);
                 thisElement.prop("disabled", false);
             }
         });
     });
 
-    $(".edit-item").click(function() {
+    $(".edit-button").click(function() {
         resetErrors();
-        let thisElement = $(`#${$(this).attr("id")}`);
-        let thisId = $(thisElement).val();
-        thisElement.val($(`#edit-item-label${thisId}`).val());
+        const thisElement = $(this);
+        const related = getRelatedObjects(thisElement);
 
+        thisElement.data("label", related.label.val());
         thisElement.prop("hidden", true);
 
-        $(`#cancel-item${thisId}`).prop("hidden", false);
-        $(`#save-item${thisId}`).prop("hidden", false);
-        $(`#edit-item-label${thisId}`).prop("disabled", false);
+        related.label.prop("disabled", false);
+        related.cancel.prop("hidden", false);
+        related.save.prop("hidden", false);
     });
 
-    $(".cancel-item").click(function() {
+    $(".cancel-button").click(function() {
         resetErrors();
-        let thisElement = $(`#${$(this).attr("id")}`);
-        let thisId = $(thisElement).val();
-        let thisEdit = $(`#edit-item${thisId}`);
-        let thisLabel = $(`#edit-item-label${thisId}`);
+        const thisElement = $(this);
+        const related = getRelatedObjects(thisElement);
 
-        thisLabel.val($(`#edit-item${thisId}`).val());
-        thisEdit.val(thisId);
+        related.label.val(related.edit.data("label"));
+        related.edit.data("label", "");
 
-        $(`#save-item${thisId}`).prop("hidden", true);
         thisElement.prop("hidden", true);
-        thisEdit.prop("hidden", false);
-        thisLabel.prop("disabled", true);
+        related.save.prop("hidden", true);
+        related.edit.prop("hidden", false);
+        related.label.prop("disabled", true);
     });
 
-    $(".save-item").click(function() {
+    $(".save-button").click(function() {
         resetErrors();
-        let thisElement = $(`#${$(this).attr("id")}`);
-        let thisId = $(thisElement).val();
+        const thisElement = $(this);
+        const related = getRelatedObjects(thisElement);
 
-        let thisLabel = $(`#edit-item-label${thisId}`);
-        let trimmedInput = thisLabel.val().trim();
+        const trimmedInput = related.label.val().trim();
 
         if (trimmedInput.length < 1) {
-            $(`#alert${thisId}`).text(emptyError);
-            $thisLabel.val($(`#edit-item${thisId}`).val());
+            related.alert.text(emptyError);
+            related.label.val(related.edit.data("label"));
             return;
         }
 
         if (trimmedInput.length > 64) {
-            $(`#alert${thisId}`).text(longError);
-            $thisLabel.val($(`#edit-item${thisId}`).val());
+            related.alert.text(longError);
+            related.label.val(related.edit.data("label"));
             return;
         }
 
-        thisLabel.prop("disabled", true);
+        related.label.prop("disabled", true);
 
-        let userData = {
+        const userData = {
             Label: trimmedInput
         };
 
         $.ajax({
             type: "PUT",
-            url: `/todoitem/updatelabel/${thisId}`,
+            url: `/todoitem/updatelabel/${related.id}`,
             data: JSON.stringify(userData),
             contentType: "application/json; charset=utf-8",
             success: function (response) {
                 // Handle the API response as needed
                 console.log("Todo list item updated successfully");
-                $(`edit-item-label${thisId}`).text(response);
                 thisElement.prop("hidden", true);
-                $(`#cancel-item${thisId}`).prop("hidden", true);
-                $(`#edit-item${thisId}`).prop("hidden", false);
+                related.label.text(response);
+                related.edit.prop("hidden", false);
+                related.cancel.prop("hidden", true);
             },
             error: function (error) {
                 // Handle API error
                 console.error("Error updating todo list item:", error);
-                $(`#alert${thisId}`).text(genericError);
-                $(`#edit-item-label${thisId}`).val($(`#edit-item${thisId}`).val());
                 thisElement.prop("hidden", true);
-                $(`#cancel-item${thisId}`).prop("hidden", true);
-                $(`#edit-item${thisId}`).prop("hidden", false);
+                related.alert.text(genericError);
+                related.label.val(related.edit.data("label"));
+                related.cancel.prop("hidden", true);
+                related.save.prop("hidden", false);
             }
         });
     });
 
-    $(".delete-item").click(function() {
+    $(".delete-button").click(function() {
         resetErrors();
-        let thisElement = $(`#${$(this).attr("id")}`);
-        let thisId = $(thisElement).val();
-        let thisText = $(`#edit-item-label${thisId}`).val();
+        const thisElement = $(this);
+        const related = getRelatedObjects(thisElement);
 
-        $("#delete-modal-name").text(thisText);
-        $("#confirm-delete").val(thisId);
+        $("#delete-modal-name").text(related.label.val());
+        $("#confirm-delete").data("id", related.id);
         $("#exampleModalCenter").modal("show");
     });
 
     $(".cancel-delete").click(function() {
         resetErrors();
-        let thisElement = $(`#${$(this).attr("id")}`);
-        let thisId = $(thisElement).val();
 
         $("#delete-modal-name").text("");
         $("#confirm-delete").val("");
@@ -216,10 +244,14 @@ $(document).ready(function () {
 
     $("#confirm-delete").click(function() {
         resetErrors();
-        let thisElement = $(this);
-        let thisId = $(thisElement).val();
+        const thisElement = $(this);
+        const related = getRelatedObjects(
+            $(`.todo-item[data-item-id="${
+                thisElement.data("id")
+            }"]`)
+        );
 
-        console.log(`Deleting: ${thisId}`);
+        console.log(`Deleting: ${related.id}`);
         thisElement.prop("disabled", true);
 
         let userData = {
@@ -228,23 +260,26 @@ $(document).ready(function () {
 
         $.ajax({
             type: "PUT",
-            url: `/todoitem/delete/${thisId}`,
+            url: `/todoitem/delete/${related.id}`,
             data: JSON.stringify(userData),
             contentType: "application/json; charset=utf-8",
             success: function (response) {
                 // Handle the API response as needed
                 console.log("Todo list item deleted successfully");
+                if (related.type == "filtered") {
+                    related.item.remove();
+                    return;
+                };
                 $("#delete-modal-name").text("");
                 $("#confirm-delete").val("");
                 $("#confirm-delete").prop("disabled", false);
                 $("#exampleModalCenter").modal("hide");
-                $(`.todo-item${thisId}`).remove();
-                $(`.filtered-item${thisId}`).remove();
+                related.item.remove();
             },
             error: function (error) {
                 // Handle API error
                 console.error("Error deleting todo list item:", error);
-                $(`#alert${thisId}`).text(genericError);
+                related.alert.text(genericError);
             }
         });
     });

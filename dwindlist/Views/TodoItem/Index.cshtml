@@ -17,13 +17,13 @@
     <div class="row">
         @await Html.PartialAsync("_Navigation", "All")
 
-        <div class="text-danger add-alert" role="alert" id="add-alert@(Model.RootId)"></div>
-        <div class="form-group">
+        <div class="form-group add-form" data-item-id="@Model.RootId">
+            <div class="text-danger add-alert" role="alert"></div>
             <label class="pt-2" for="new-item-label@(Model.RootId)">New Task:</label>
             <div class="input-group mb-3">
-                <input type="text" class="form-control" id="new-item-label@(Model.RootId)">
+                <input type="text" class="form-control item-label" id="new-item-label@(Model.RootId)">
                 <div class="input-group-append">
-                    <button class="btn btn-primary add-item" type="button" id="add-item@(Model.RootId)" value="@Model.RootId">+</button>
+                    <button class="btn btn-primary add-button" type="button">+</button>
                 </div>
             </div>
         </div>
@@ -31,47 +31,49 @@
         <div id="todo-list">
             @foreach(var item in Model.Items)
             {
-            <div class="text-danger custom-alert" role="alert" id="alert@(item.Id)"></div>
-            <div class="input-group mb-3 pt-2 todo-item@(item.Id)" style="width: 100%;">
+            <div class="todo-item" data-item-id="@item.Id">
+                <div class="text-danger custom-alert" role="alert"></div>
+                <div class="input-group mb-3 pt-2" style="width: 100%;">
                     <div class="input-group-text">
-                        <input type="checkbox" class="toggle-status" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
+                        <input type="checkbox" class="status-checkbox" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
                     </div>
-                <input type="text" disabled="true" class="form-control @(item.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
-                <button class="btn btn-sm btn-secondary toggle-expand" id="toggle-expand@(item.Id)" value="@item.Id">@(item.Expanded == 'c' ? ">" : "V")</button>
-                <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button>
-                <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
-                <button class="btn btn-sm btn-secondary cancel-item" id="cancel-item@(item.Id)" value="@item.Id" hidden>Cancel</button>
-                <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
-                <button class="btn btn-sm btn-danger delete-item" id="delete-item@(item.Id)" value="@item.Id">Delete</button>
-            </div>
-            <div class="col-md-11 float-end todo-item@(item.Id) parent-item" id="parent-item@(item.Id)" @(item.Expanded == 'c' ? "hidden" : "")>
-                <div class="text-danger add-alert" role="alert" id="add-alert@(item.Id)"></div>
-                    <div class="form-group">
+                    <input type="text" disabled="true" class="form-control item-label @(item.Status == 'c' ? "text-decoration-line-through": "")" aria-label="Text input with checkbox" value="@item.Label">
+                    <button class="btn btn-sm btn-secondary expand-button">@(item.Expanded == 'c' ? ">" : "V")</button>
+                    <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-secondary">Focus</button>
+                    <button class="btn btn-sm btn-success edit-button">Edit</button>
+                    <button class="btn btn-sm btn-secondary cancel-button" hidden>Cancel</button>
+                    <button class="btn btn-sm btn-primary save-button" hidden>Save</button>
+                    <button class="btn btn-sm btn-danger delete-button">Delete</button>
+                </div>
+                <div class="col-md-11 float-end sublist" data-parent-id="@item.Id" @(item.Expanded == 'c' ? "hidden" : "")>
+                    <div class="form-group add-form" data-item-id="@item.Id">
+                        <div class="text-danger add-alert" role="alert"></div>
                         <label class="pt-2" for="new-item-label@(item.Id)">New Sub-task:</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" id="new-item-label@(item.Id)">
+                            <input type="text" class="form-control item-label" id="new-item-label@(item.Id)">
                             <div class="input-group-append">
-                                <button class="btn btn-primary add-item" type="button" id="add-item@(item.Id)" value="@item.Id">+</button>
+                                <button class="btn btn-primary add-button" type="button">+</button>
                             </div>
                         </div>
                     </div>
-                @foreach(var subitem in item.Children)
-                {
-                <div class=todo-item@(subitem.Id)>
-                    <div class="text-danger custom-alert" role="alert" id="alert@(subitem.Id)"></div>
-                    <div class="input-group mb-3 pt-2" style="width: 100%;">
-                        <div class="input-group-text">
-                            <input type="checkbox" class="toggle-status" id="toggle-status@(subitem.Id)" value="@subitem.Id" aria-label="Main Checkbox" @(subitem.Status == 'c' ? "checked" : "")>
+                    @foreach(var subitem in item.Children)
+                    {
+                    <div class="todo-item" data-item-id="@subitem.Id">
+                        <div class="text-danger custom-alert" role="alert"></div>
+                        <div class="input-group mb-3 pt-2" style="width: 100%;">
+                            <div class="input-group-text">
+                                <input type="checkbox" class="status-checkbox" aria-label="Main Checkbox" @(subitem.Status == 'c' ? "checked" : "")>
+                            </div>
+                            <input type="text" disabled="true" class="form-control item-label @(subitem.Status == 'c' ? "text-decoration-line-through": "")" aria-label="Text input with checkbox" value="@subitem.Label">
+                            <button onclick="window.location.href='/TodoItem/Index/@(subitem.Id)'" class="btn btn-sm btn-secondary">Focus</button>
+                            <button class="btn btn-sm btn-success edit-button">Edit</button>
+                            <button class="btn btn-sm btn-secondary cancel-button" hidden>Cancel</button>
+                            <button class="btn btn-sm btn-primary save-button" hidden>Save</button>
+                            <button class="btn btn-sm btn-danger delete-button">Delete</button>
                         </div>
-                    <input type="text" disabled="true" class="form-control @(subitem.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(subitem.Id)" aria-label="Text input with checkbox" value="@subitem.Label">
-                    <button onclick="window.location.href='/TodoItem/Index/@(subitem.Id)'" class="btn btn-sm btn-secondary expand-item" id="expand-item@(subitem.Id)" value="@subitem.Id">Focus</button>
-                    <button class="btn btn-sm btn-success edit-item" id="edit-item@(subitem.Id)" value="@subitem.Id">Edit</button>
-                    <button class="btn btn-sm btn-secondary cancel-item" id="cancel-item@(subitem.Id)" value="@subitem.Id" hidden>Cancel</button>
-                    <button class="btn btn-sm btn-primary save-item" id="save-item@(subitem.Id)" value="@subitem.Id" hidden>Save</button>
-                    <button class="btn btn-sm btn-danger delete-item" id="delete-item@(subitem.Id)" value="@subitem.Id">Delete</button>
                     </div>
+                    }
                 </div>
-                }
             </div>
             }
         </div>

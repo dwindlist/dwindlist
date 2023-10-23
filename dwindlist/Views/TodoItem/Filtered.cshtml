@@ -13,26 +13,28 @@
     <div class="row">
         @await Html.PartialAsync("_Navigation", Model.Label)
 
-        <div id="todo-list">
+        <div id="filtered-list">
             @foreach(var item in Model.Items)
             {
-            <div class="text-danger custom-alert" role="alert" id="alert@(item.Id)"></div>
-            <div class="input-group mb-3 filtered-item@(item.Id)" style="width: 100%;">
-                <div class="input-group-text">
-                    <input class="toggle-status" type="checkbox" id="toggle-status@(item.Id)" value="@item.Id" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
+            <div class="todo-item" data-item-id="@item.Id" data-item-type="filtered">
+                <div class="text-danger custom-alert" role="alert"></div>
+                <div class="input-group mb-3" style="width: 100%;">
+                    <div class="input-group-text">
+                        <input class="status-checkbox" type="checkbox" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
+                    </div>
+                    <input type="text" disabled="true" class="form-control item-label @(item.Status == 'c' ? "text-decoration-line-through": "")" aria-label="Text input with checkbox" value="@item.Label">
+                    <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button>
+                    <button class="btn btn-sm btn-success edit-button">Edit</button>
+                    <button class="btn btn-sm btn-secondary cancel-button" hidden>Cancel</button>
+                    <button class="btn btn-sm btn-primary save-button" hidden>Save</button>
+                    <button class="btn btn-sm btn-danger delete-button">Delete</button>
                 </div>
-                <input type="text" disabled="true" class="form-control @(item.Status == 'c' ? "text-decoration-line-through": "")" id="edit-item-label@(item.Id)" aria-label="Text input with checkbox" value="@item.Label">
-                <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-secondary expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button>
-                <button class="btn btn-sm btn-success edit-item" id="edit-item@(item.Id)" value="@item.Id">Edit</button>
-                <button class="btn btn-sm btn-primary save-item" id="save-item@(item.Id)" value="@item.Id" hidden>Save</button>
-                    <button class="btn btn-sm btn-danger delete-item" id="delete-item@(item.Id)" value="@item.Id">Delete</button>
-            </div>
-            @*TODO: breadcrumbs*@
-            <div class="breadcrumbs filtered-item@(item.Id)">
-                @foreach (var breadcrumb in item.Breadcrumbs)
-                {
-                <span>></span> <a href="/TodoItem/Index/@(breadcrumb.Id)">@breadcrumb.Label</a>
-                }
+                <div class="breadcrumbs filtered-item@(item.Id)">
+                    @foreach (var breadcrumb in item.Breadcrumbs)
+                    {
+                    <span>></span> <a href="/TodoItem/Index/@(breadcrumb.Id)">@breadcrumb.Label</a>
+                    }
+                </div>
             </div>
             }
         </div>
