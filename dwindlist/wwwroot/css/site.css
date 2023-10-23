@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  margin-bottom: 180px;
 }
 
 .logo-login {
@@ -29,4 +29,16 @@ body {
 
 .login-dwindlist {
     margin-top: 75px;
+}
+
+a {
+    color: #ECEFF4;
+}
+
+a:hover {
+    color: #D8DEE9;
+}
+
+a:link {
+    text-decoration: none;
 }
