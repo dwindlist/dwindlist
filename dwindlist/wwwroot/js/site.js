@@ -43,8 +43,8 @@ $(document).ready(function () {
         return {
             item: thisItem,
             id: id,
-            label: thisItem.find(".item-label"),
-            alert: thisItem.find(".add-alert"),
+            label: thisItem.find(".new-item-label").eq(0),
+            alert: thisItem.find(".add-alert").eq(0),
         }
     }
 
@@ -86,17 +86,21 @@ $(document).ready(function () {
             success: function (response) {
                 // Handle the API response as needed
                 console.log("Todo list item toggled successfully");
-                console.log(response);;
                 if (related.type == "filtered") {
                     related.item.remove();
                     return;
                 };
 
                 thisElement.prop("disabled", false);
+                const checked = thisElement.prop("checked");
+                if (checked) {
+                    related.label.addClass("text-decoration-line-through");
+                } else {
+                    related.label.removeClass("text-decoration-line-through");
+                }
 
                 if (related.type == "parent") {
-                // check all children of a parent
-                    const checked = thisElement.prop("checked");
+                    // check all children of a parent
                     related.item.find(".status-checkbox").prop("checked", checked);
 
                     if (checked) {
@@ -109,15 +113,11 @@ $(document).ready(function () {
                     const parentObj = related.item.parents(".todo-item");
                     const parent = getRelatedObjects(parentObj);
 
-                    if (response == 'c'){
-                        parent.status.prop("checked", true);
-                        parent.label.addClass("text-decoration-line-through");
-                    } else {
-                        parent.status.prop("checked", false);
-                        parent.label.removeClass("text-decoration-line-through");
+                    if (response){
+                        parent.status.prop("checked", thisElement.prop("checked"));
+                        parent.label.toggleClass("text-decoration-line-through");
                     }
                 }
-
             },
             error: function (error) {
                 // Handle API error

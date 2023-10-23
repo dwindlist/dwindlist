@@ -125,7 +125,7 @@ namespace dwindlist.Controllers
             }
 
             TodoItemManager todoItemManager = new();
-            char parentStatus = todoItemManager.ToggleItemStatus(userId, id);
+            bool parentStatus = todoItemManager.ToggleItemStatus(userId, id);
 
             return Ok(parentStatus);
         }
