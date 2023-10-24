@@ -162,6 +162,8 @@ namespace dwindlist.Models.EntityManager
             TodoItem item = userItems.Single(i => i.Id == id);
             Recurse(item, userItems, i => i.Active = 'd');
 
+            _ = userItems.Remove(item);
+            _ = RecursiveUpdateParentStatus(item, userItems);
             _ = db.SaveChanges();
         }
 
@@ -210,10 +212,7 @@ namespace dwindlist.Models.EntityManager
             }
         }
 
-        private static bool RecursiveUpdateParentStatus(
-            TodoItem item,
-            List<TodoItem> userItems
-        )
+        private static bool RecursiveUpdateParentStatus(TodoItem item, List<TodoItem> userItems)
         {
             bool val = UpdateParentStatus(item, userItems);
             if (item.ParentId == 0)
@@ -236,10 +235,7 @@ namespace dwindlist.Models.EntityManager
             return val;
         }
 
-        private static bool UpdateParentStatus(
-            TodoItem item,
-            List<TodoItem> userItems
-        )
+        private static bool UpdateParentStatus(TodoItem item, List<TodoItem> userItems)
         {
             bool shouldUpdateParent = false;
             if (item.ParentId == 0)
