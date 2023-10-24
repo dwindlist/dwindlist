@@ -42,3 +42,11 @@ a:hover {
 a:link {
     text-decoration: none;
 }
+
+.form-control {
+    background-color: #7D889D;
+}
+
+.footer {
+    color: #ECEFF4;
+}

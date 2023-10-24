@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Anaheim&family=Chakra+Petch:wght@400;700&family=DM+Mono&family=Inconsolata&family=Poppins&family=Quantico:wght@400;700&family=Roboto+Mono&family=Rubik+Mono+One&family=Share+Tech+Mono&display=swap');
 
 * {
-    color: #ECEFF4;
     font-family: 'Poppins', sans-serif;
 }
 
 body {
     background-color: #2e3440;
+    color: #ECEFF4;
 }
 
 .logo {
@@ -19,6 +19,3 @@ body {
     color: #000;
 }
 
-.form-control-dark{
-    background-color: #3e4656;
-}
