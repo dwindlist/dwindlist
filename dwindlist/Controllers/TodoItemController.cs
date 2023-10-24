@@ -178,9 +178,9 @@ namespace dwindlist.Controllers
             }
 
             TodoItemManager todoItemManager = new();
-            todoItemManager.DeleteItem(userId, id);
+            bool shouldUpdateParent = todoItemManager.DeleteItem(userId, id);
 
-            return Ok();
+            return Ok(shouldUpdateParent);
         }
     }
 }
