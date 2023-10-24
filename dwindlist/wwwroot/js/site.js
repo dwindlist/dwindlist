@@ -27,7 +27,7 @@ $(document).ready(function () {
             type: thisItem.data("item-type"),
             status: thisItem.find(".status-checkbox").eq(0),
             label: thisItem.find(".item-label").eq(0),
-            expand: thisItem.find(".item-label").eq(0),
+            expand: thisItem.find(".expand-button").eq(0),
             edit: thisItem.find(".edit-button").eq(0),
             cancel: thisItem.find(".cancel-button").eq(0),
             save: thisItem.find(".save-button").eq(0),
