@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  margin-bottom: 180px;
+  margin-bottom: 120px;
 }
 
 .logo-login {
@@ -45,8 +45,4 @@ a:link {
 
 .form-control {
     background-color: #7D889D;
-}
-
-.footer {
-    color: #ECEFF4;
 }
