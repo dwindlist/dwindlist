@@ -151,7 +151,7 @@ namespace dwindlist.Models.EntityManager
             return shouldUpdateParent;
         }
 
-        public void DeleteItem(string userId, int id)
+        public bool DeleteItem(string userId, int id)
         {
             using ApplicationDbContext db = new();
             List<TodoItem> userItems = db.TodoItem
@@ -162,9 +162,13 @@ namespace dwindlist.Models.EntityManager
             TodoItem item = userItems.Single(i => i.Id == id);
             Recurse(item, userItems, i => i.Active = 'd');
 
-            _ = userItems.Remove(item);
-            _ = RecursiveUpdateParentStatus(item, userItems);
+            // mark deactivated as complete
+            // updates assume userItems are all active, not deactivated
+            // functionally the same in this context
+            item.Status = 'c';
+            bool shouldUpdateParent = RecursiveUpdateParentStatus(item, userItems);
             _ = db.SaveChanges();
+            return shouldUpdateParent;
         }
 
         private static FilteredList FilterTodoList(

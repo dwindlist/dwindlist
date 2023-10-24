@@ -92,15 +92,13 @@ $(document).ready(function () {
                 };
 
                 thisElement.prop("disabled", false);
-                const checked = thisElement.prop("checked");
-                if (checked) {
-                    related.label.addClass("text-decoration-line-through");
-                } else {
-                    related.label.removeClass("text-decoration-line-through");
-                }
+
+                // toggle label strikethrough
+                related.label.toggleClass("text-decoration-line-through");
 
                 if (related.type == "parent") {
                     // check all children of a parent
+                    const checked = thisElement.prop("checked");
                     related.item.find(".status-checkbox").prop("checked", checked);
 
                     if (checked) {
@@ -114,7 +112,7 @@ $(document).ready(function () {
                     const parent = getRelatedObjects(parentObj);
 
                     if (response){
-                        parent.status.prop("checked", thisElement.prop("checked"));
+                        parent.status.prop("checked", !parent.status.prop("checked"));
                         parent.label.toggleClass("text-decoration-line-through");
                     }
                 }
@@ -300,6 +298,17 @@ $(document).ready(function () {
                 $("#confirm-delete").val("");
                 $("#confirm-delete").prop("disabled", false);
                 $("#exampleModalCenter").modal("hide");
+
+                if (related.type != "parent") {
+                    // check parent if all children are checked
+                    const parentObj = related.item.parents(".todo-item");
+                    const parent = getRelatedObjects(parentObj);
+
+                    if (response){
+                        parent.status.prop("checked", !parent.status.prop("checked"));
+                        parent.label.toggleClass("text-decoration-line-through");
+                    }
+                }
                 related.item.remove();
             },
             error: function (error) {
