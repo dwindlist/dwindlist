@@ -18,6 +18,12 @@
             {
             <div class="todo-item" data-item-id="@item.Id" data-item-type="filtered">
                 <div class="text-danger custom-alert" role="alert"></div>
+                <div class="breadcrumbs filtered-item@(item.Id)">
+                    @foreach (var breadcrumb in item.Breadcrumbs)
+                    {
+                    <span>></span> <a href="/TodoItem/Index/@(breadcrumb.Id)">@breadcrumb.Label</a>
+                    }
+                </div>
                 <div class="input-group mb-3" style="width: 100%;">
                     <div class="input-group-text">
                         <input class="status-checkbox" type="checkbox" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
@@ -28,12 +34,6 @@
                     <button class="btn btn-sm btn-secondary cancel-button" hidden>Cancel</button>
                     <button class="btn btn-sm btn-primary save-button" hidden>Save</button>
                     <button class="btn btn-sm btn-danger delete-button">Delete</button>
-                </div>
-                <div class="breadcrumbs filtered-item@(item.Id)">
-                    @foreach (var breadcrumb in item.Breadcrumbs)
-                    {
-                    <span>></span> <a href="/TodoItem/Index/@(breadcrumb.Id)">@breadcrumb.Label</a>
-                    }
                 </div>
             </div>
             }
