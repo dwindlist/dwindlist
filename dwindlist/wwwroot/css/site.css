@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  margin-bottom: 120px;
+  margin-bottom: 30px;
 }
 
 .logo-login {
@@ -44,7 +44,7 @@ a:link {
 }
 
 .form-control {
-    background-color: #7D889D;
+    background-color: #CEDAEC;
 }
 
 .col-md-11-5 {
@@ -82,3 +82,64 @@ a:link {
     border-color: #BF616A;
 }
 
+.btn-cancel {
+    color: #fff;
+    background-color: #7D889D;
+    border-color: #7D889D;
+}
+
+.btn-save {
+    color: #fff;
+    background-color: #5E81AC;
+    border-color: #5E81AC;
+}
+
+.btn-search {
+    color: #fff;
+    background-color: #5E81AC;
+    border-color: #5E81AC;
+}
+
+.nav-link-font {
+    color: #00CBCB;
+}
+
+.mt-10 {
+    margin-top: 7rem !important;
+}
+
+.mx-10 {
+    margin-top: 8.5rem !important;
+    margin-bottom: 8.5rem !important;
+}
+
+.my-10 {
+    margin-top: 5rem !important;
+    margin-bottom: 5rem !important;
+}
+
+.mt-15 {
+    margin-top: 11rem !important;
+}
+
+.pe-10 {
+    padding-right: 10rem !important;
+}
+
+.px-10-5 {
+    padding-right: 3rem !important;
+    padding-left: 7rem !important;
+}
+
+.mt-10-5 {
+    margin-top: 12rem;
+}
+
+.logo-login-1 {
+    vertical-align: middle !important;
+    text-align:left !important;
+}
+
+.ps-4-5 {
+    padding-left: 10px ;
+}

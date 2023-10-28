@@ -31,8 +31,8 @@
                     <input type="text" disabled="true" class="form-control item-label @(item.Status == 'c' ? "text-decoration-line-through": "")" aria-label="Text input with checkbox" value="@item.Label">
                     <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-focus expand-item" id="expand-item@(item.Id)" value="@item.Id">Focus</button>
                     <button class="btn btn-sm btn-edit edit-button">Edit</button>
-                    <button class="btn btn-sm btn-secondary cancel-button" hidden>Cancel</button>
-                    <button class="btn btn-sm btn-primary save-button" hidden>Save</button>
+                    <button class="btn btn-sm btn-cancel cancel-button" hidden>Cancel</button>
+                    <button class="btn btn-sm btn-save save-button" hidden>Save</button>
                     <button class="btn btn-sm btn-delete delete-button">Delete</button>
                 </div>
             </div>
@@ -57,8 +57,8 @@
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary cancel-delete">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete" value="">Delete</button>
+                    <button type="button" class="btn btn-cancel cancel-delete">Cancel</button>
+                    <button type="button" class="btn btn-save" id="confirm-delete" value="">Delete</button>
                 </div>
             </div>
         </div>
