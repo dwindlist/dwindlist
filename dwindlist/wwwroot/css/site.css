@@ -51,3 +51,34 @@ a:link {
     flex: 0 0 auto;
     width: 90%;
 }
+
+.btn-add {
+    color: #fff;
+    background-color: #5E81AC;
+    border-color: #5E81AC;
+}
+
+.btn-dropdown {
+    color: #fff;
+    background-color: #8FBCBB;
+    border-color: #8FBCBB;
+}
+
+.btn-focus {
+    color: #fff;
+    background-color: #88C0D0;
+    border-color: #88C0D0;
+}
+
+.btn-edit {
+    color: #fff;
+    background-color: #81A1C1;
+    border-color: #81A1C1;
+}
+
+.btn-delete {
+    color: #fff;
+    background-color: #BF616A;
+    border-color: #BF616A;
+}
+
