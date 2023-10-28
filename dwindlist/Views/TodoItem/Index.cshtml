@@ -45,7 +45,7 @@
                     <button class="btn btn-sm btn-primary save-button" hidden>Save</button>
                     <button class="btn btn-sm btn-danger delete-button">Delete</button>
                 </div>
-                <div class="col-md-11 float-end sublist" data-parent-id="@item.Id" @(item.Expanded == 'c' ? "hidden" : "")>
+                <div class="ms-5 sublist" data-parent-id="@item.Id" @(item.Expanded == 'c' ? "hidden" : "")>
                     <div class="form-group add-form" data-item-id="@item.Id">
                         <div class="text-danger add-alert" role="alert"></div>
                         <label class="pt-2" for="new-item-label@(item.Id)">New Sub-task:</label>

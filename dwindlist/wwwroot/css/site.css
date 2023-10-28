@@ -46,3 +46,8 @@ a:link {
 .form-control {
     background-color: #7D889D;
 }
+
+.col-md-11-5 {
+    flex: 0 0 auto;
+    width: 90%;
+}
