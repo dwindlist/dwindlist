@@ -23,6 +23,14 @@ switch ($args[0]) {
 		}
 		try { ./dwindlist.exe } finally { Set-Location .. }
 	}
+	"package" {
+		_build
+		Set-Location ./build
+    $script:packageExists = (Test-Path -Path ./dwindlist.zip)
+		if (-Not $script:packageExists) {
+			7z.exe a -tzip dwindlist *
+		}
+	}
 	"clean" {
 		Remove-Item -r -fo ./build -ErrorAction SilentlyContinue
 		SqlLocalDB.exe p dwindlistdb
