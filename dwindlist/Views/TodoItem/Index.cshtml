@@ -23,7 +23,7 @@
             <div class="input-group mb-3">
                 <input type="text" class="form-control new-item-label" id="new-item-label@(Model.RootId)>
                 <div class="input-group-append">
-                    <button class="btn btn-primary add-button" type="button">+</button>
+                    <button class="btn btn-add add-button" type="button">+</button>
                 </div>
             </div>
         </div>
@@ -38,12 +38,12 @@
                         <input type="checkbox" class="status-checkbox" aria-label="Main Checkbox" @(item.Status == 'c' ? "checked" : "")>
                     </div>
                     <input type="text" disabled="true" class="form-control item-label @(item.Status == 'c' ? "text-decoration-line-through": "")" aria-label="Text input with checkbox" value="@item.Label">
-                    <button class="btn btn-sm btn-secondary expand-button">@(item.Expanded == 'c' ? ">" : "V")</button>
-                    <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-secondary">Focus</button>
-                    <button class="btn btn-sm btn-success edit-button">Edit</button>
+                    <button class="btn btn-sm btn-dropdown expand-button">@(item.Expanded == 'c' ? ">" : "v")</button>
+                    <button onclick="window.location.href='/TodoItem/Index/@(item.Id)'"class="btn btn-sm btn-focus">Focus</button>
+                    <button class="btn btn-sm btn-edit edit-button">Edit</button>
                     <button class="btn btn-sm btn-secondary cancel-button" hidden>Cancel</button>
                     <button class="btn btn-sm btn-primary save-button" hidden>Save</button>
-                    <button class="btn btn-sm btn-danger delete-button">Delete</button>
+                    <button class="btn btn-sm btn-delete delete-button">Delete</button>
                 </div>
                 <div class="ms-5 sublist" data-parent-id="@item.Id" @(item.Expanded == 'c' ? "hidden" : "")>
                     <div class="form-group add-form" data-item-id="@item.Id">
@@ -52,7 +52,7 @@
                         <div class="input-group mb-3">
                             <input type="text" class="form-control new-item-label" id="new-item-label@(item.Id)">
                             <div class="input-group-append">
-                                <button class="btn btn-primary add-button" type="button">+</button>
+                                <button class="btn btn-add add-button" type="button">+</button>
                             </div>
                         </div>
                     </div>
@@ -65,11 +65,11 @@
                                 <input type="checkbox" class="status-checkbox" aria-label="Main Checkbox" @(subitem.Status == 'c' ? "checked" : "")>
                             </div>
                             <input type="text" disabled="true" class="form-control item-label @(subitem.Status == 'c' ? "text-decoration-line-through": "")" aria-label="Text input with checkbox" value="@subitem.Label">
-                            <button onclick="window.location.href='/TodoItem/Index/@(subitem.Id)'" class="btn btn-sm btn-secondary">Focus</button>
-                            <button class="btn btn-sm btn-success edit-button">Edit</button>
+                            <button onclick="window.location.href='/TodoItem/Index/@(subitem.Id)'" class="btn btn-sm btn-focus">Focus</button>
+                            <button class="btn btn-sm btn-edit edit-button">Edit</button>
                             <button class="btn btn-sm btn-secondary cancel-button" hidden>Cancel</button>
                             <button class="btn btn-sm btn-primary save-button" hidden>Save</button>
-                            <button class="btn btn-sm btn-danger delete-button">Delete</button>
+                            <button class="btn btn-sm btn-delete delete-button">Delete</button>
                         </div>
                     </div>
                     }
