@@ -5,17 +5,17 @@
         <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
-                    <a class="nav-link@(Model == "All" ? " active" : "")" href="/">All</a>
+                    <a class="nav-link-font nav-link@(Model == "All" ? " active" : "")" href="/">All</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link@(Model == "Completed" ? " active" : "")" href="/TodoItem/Completed">Completed</a>
+                    <a class="nav-link-font nav-link@(Model == "Completed" ? " active" : "")" href="/TodoItem/Completed">Completed</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link@(Model == "Incomplete" ? " active" : "")" href="/TodoItem/Incomplete">Incomplete</a>
+                    <a class="nav-link-font nav-link@(Model == "Incomplete" ? " active" : "")" href="/TodoItem/Incomplete">Incomplete</a>
                 </li>
                 <li class="nav-item ms-auto">
                     <input type="text" class="text-dark" id="search-box">
-                    <button class="btn btn-sm btn-primary" id="search-box-confirm">Search</button>
+                    <button class="btn btn-sm btn-search" id="search-box-confirm">Search</button>
                 </li>
             </ul>
         </div>
