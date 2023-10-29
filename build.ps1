@@ -4,6 +4,12 @@ function script:_build {
 		Set-Location ./dwindlist
 		dotnet publish -o ../build --self-contained
 		dotnet ef migrations bundle -o ../build/efbundle.exe --self-contained
+		$script:dwindlistDbExists = (SqlLocalDB.exe i) -contains "dwindlistdb"
+		if (-Not ($script:dwindlistDbExists)) {
+			Set-Location ../build
+			SqlLocalDB.exe c dwindlistdb
+			./efbundle.exe
+		}
 		Set-Location ..
 	}
 }
@@ -16,11 +22,6 @@ switch ($args[0]) {
 	"run" {
 		_build
 		Set-Location ./build
-		$script:dwindlistDbExists = (SqlLocalDB.exe i) -contains "dwindlistdb"
-		if (-Not ($script:dwindlistDbExists)) {
-			SqlLocalDB.exe c dwindlistdb
-			./efbundle.exe
-		}
 		try { ./dwindlist.exe } finally { Set-Location .. }
 	}
 	"package" {
