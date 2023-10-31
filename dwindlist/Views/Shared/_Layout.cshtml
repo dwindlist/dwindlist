@@ -14,33 +14,54 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark shadow-sm rounded">
             <div class="container">
-                <a class="navbar-brand dwindlist" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img class="logo" src="~/img/dwindlist.png">
-                        dwindlist
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                        @if (User.Identity.IsAuthenticated)
-                        {
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a class="navbar-brand dwindlist" asp-area="" asp-controller="Home" asp-action="Index">
+                        <img class="logo" src="~/img/dwindlist.png">
+                        dwindlist
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">To-do list</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-area="" asp-controller="" asp-action="">About</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-area="" asp-controller="" asp-action="">About dwindlist</a>
+                                </li>
+                            }
+                        </ul>
+                        <partial name="_LoginPartial" />
+                    </div>
+                }
+                else
+                {
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">To-do list</a>
+                                <a class="nav-link text-light" asp-area="" asp-controller="" asp-action="">Home</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="" asp-action="">About</a>
-                            </li>
-                        }
-                        else
-                        {
                             <li class="nav-item">
                                 <a class="nav-link text-light" asp-area="" asp-controller="" asp-action="">About dwindlist</a>
                             </li>
-                        }
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
+                        </ul>
+                        <partial name="_LoginPartial" />
+                    </div>
+                }
+
             </div>
         </nav>
     </header>
