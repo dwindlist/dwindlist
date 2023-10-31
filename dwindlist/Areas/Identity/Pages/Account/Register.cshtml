@@ -4,10 +4,9 @@
     ViewData["Title"] = "Register";
 }
 
-<h1 class="pt-4">@ViewData["Title"]</h1>
-
 <div class="row">
-    <div class="col-md-4 pt-2">
+    <div class="col col-md-5 pt-5 mx-5">
+        <h1>@ViewData["Title"]</h1>
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h2>Create a new account.</h2>
             <hr />
@@ -30,16 +29,13 @@
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
     </div>
-    <div class="col-md-2 px-4 py-4 login-dwindlist">
-        <img src="~/img/dwindlist.png" class="logo-login img-fluid">
+    <div class="col col-md-2 my-10-5 ms-1">
+        <img src="~/img/dwindlist.png" class="logo-login">
     </div>
-    <div class="col-md-6 py-4 login-dwindlist">
+    <div class="col col-md-4 mt-10-5 ms-2">
         <h1>dwindlist</h1>
         <h5>
-            dwindlist (stylized with a lowercase “d”) is a gamified to-do list app aimed to help
-            those who feel overwhelmed to complete even a single task. It encourages users to
-            break down their tasks into smaller, more manageable tasks by allowing them to nest
-            lists within lists down many levels.
+            it's lists all the way down
         </h5>
     </div>
 </div>
