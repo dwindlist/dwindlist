@@ -14,7 +14,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark shadow-sm rounded">
             <div class="container">
-                @if (User.Identity.IsAuthenticated)
+                @if (User.Identity?.IsAuthenticated == true)
                 {
                     <a class="navbar-brand dwindlist" asp-area="" asp-controller="Home" asp-action="Index">
                         <img class="logo" src="~/img/dwindlist.png">
