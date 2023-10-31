@@ -26,10 +26,11 @@ switch ($args[0]) {
 	}
 	"package" {
 		_build
-		Set-Location ./build
-    $script:packageExists = (Test-Path -Path ./dwindlist.zip)
+		$script:packageExists = (Test-Path -Path ./dwindlist.zip)
 		if (-Not $script:packageExists) {
-			7z.exe a -tzip dwindlist *
+			Set-Location ./build
+			7z.exe a -tzip ../dwindlist *
+			Set-Location ..
 		}
 	}
 	"clean" {
