@@ -35,7 +35,7 @@ namespace dwindlist.Controllers
             }
 
             TodoItemManager todoItemManager = new();
-            TodoList todoList = todoItemManager.GetTodoList(userId, (int)id);
+            TodoList todoList = todoItemManager.GetTodoList(userId, id);
 
             return View(todoList);
         }
@@ -164,7 +164,7 @@ namespace dwindlist.Controllers
             TodoItemManager todoItemManager = new();
             todoItemManager.UpdateItemLabel(userId, id, todoItemDto);
 
-            return Ok(todoItemDto.Label);
+            return Ok();
         }
 
         [Authorize]

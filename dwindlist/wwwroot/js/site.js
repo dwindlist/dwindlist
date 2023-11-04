@@ -232,7 +232,7 @@ $(document).ready(function () {
                 // Handle the API response as needed
                 console.log("Todo list item updated successfully");
                 thisElement.prop("hidden", true);
-                related.label.text(response);
+                related.label.text(trimmedInput);
                 related.edit.prop("hidden", false);
                 related.cancel.prop("hidden", true);
             },
