@@ -67,8 +67,8 @@ $(document).ready(function () {
             },
             error: function (error) {
                 // Handle API error
-                console.error("Error toggling todo list item:", error);
-                related.alert.eq(0).text(genericError);
+                console.error(error.responseText);
+                related.alert.eq(0).text(error.responseText);
                 thisElement.prop("disabled", false);
             }
         });
@@ -87,7 +87,6 @@ $(document).ready(function () {
                 // Handle the API response as needed
                 console.log("Todo list item toggled successfully");
                 if (related.type == "filtered") {
-                    related.item.remove();
                     return;
                 };
 
@@ -119,8 +118,9 @@ $(document).ready(function () {
             },
             error: function (error) {
                 // Handle API error
-                console.error("Error adding toggling todo list item:", error);
-                related.alert.text(genericError);
+                console.error(error.responseText);
+                related.alert.text(error.responseText);
+                thisElement.prop("checked", !thisElement.prop("checked"));
                 thisElement.prop("disabled", false);
             }
         });
@@ -164,8 +164,8 @@ $(document).ready(function () {
             },
             error: function (error) {
                 // Handle API error
-                console.error("Error adding todo list item:", error);
-                related.alert.text(genericError);
+                console.error(error.responseText);
+                related.alert.text(error.responseText);
                 thisElement.prop("disabled", false);
             }
         });
@@ -238,12 +238,12 @@ $(document).ready(function () {
             },
             error: function (error) {
                 // Handle API error
-                console.error("Error updating todo list item:", error);
-                thisElement.prop("hidden", true);
-                related.alert.text(genericError);
+                console.error(error.responseText);
+                related.alert.text(error.responseText);
                 related.label.val(related.edit.data("label"));
                 related.cancel.prop("hidden", true);
                 related.save.prop("hidden", false);
+                thisElement.prop("hidden", true);
             }
         });
     });
@@ -313,8 +313,8 @@ $(document).ready(function () {
             },
             error: function (error) {
                 // Handle API error
-                console.error("Error deleting todo list item:", error);
-                related.alert.text(genericError);
+                console.error(error.responseText);
+                related.alert.text(error.responseText);
             }
         });
     });

@@ -1,6 +1,7 @@
 using dwindlist.Data;
 using dwindlist.Dtos;
 using dwindlist.Models.ViewModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace dwindlist.Models.EntityManager
 {
@@ -24,37 +25,66 @@ namespace dwindlist.Models.EntityManager
         /// <remarks>
         /// The root is the parent of the <see cref="TodoList">ViewModel</see>'s outer list items.
         /// </remarks>
-        public TodoList GetTodoList(string userId, int? rootId)
+        /// <exception cref="ItemNotFoundException"/>
+        /// <exception cref="ItemNotOwnedException"/>
+        /// <exception cref="DbUpdateException"/>
+        public TodoList GetTodoList(string userId, int rootId)
         {
-            // default to top level items if no root provided
-            rootId ??= 0;
+            // a flag to disregard some exceptions
+            // 0th item need not exist/have an owner
+            bool topLevel = rootId == 0;
 
             using ApplicationDbContext db = new();
+
+            // the focused item
+            // its children will be parents in the TodoList
+            TodoItem? rootItem = db.TodoItem.FirstOrDefault(
+                i => (i.Id == rootId && i.Active == 'a')
+            );
+
+            bool itemExists = rootItem != null;
+            if (!topLevel && !itemExists)
+            {
+                throw new ItemNotFoundException();
+            }
+
+            bool userOwnsItem = rootItem?.UserId == userId;
+            if (!topLevel && !userOwnsItem)
+            {
+                throw new ItemNotOwnedException();
+            }
+
+            // convert to list immediately and perform subsequent queries
+            // in-memory to prevent stressing the database.
             List<TodoItem> userItems = db.TodoItem
                 .Where(i => i.UserId == userId)
                 .Where(i => i.Active == 'a')
                 .ToList();
 
-            // convert to list immediately and perform subsequent queries
-            // in-memory to prevent stressing the database
             List<TodoItem> parents = userItems.Where(i => i.ParentId == rootId).ToList();
             TodoList todoList = new() { RootId = (int)rootId, };
 
             // get breadcrumbs if not top level (for navigation)
-            if (rootId != 0)
+            if (!topLevel)
             {
-                TodoItem currentItem = userItems.Single(i => i.Id == rootId);
-                todoList.Label = currentItem.Label;
+                // disable compiler warning
+                // we already checked for null above
+                #pragma warning disable CS8602 // possibly null reference
+                todoList.Label = rootItem.Label;
+                #pragma warning restore CS8602 // possibly null reference
+
                 todoList.Breadcrumbs = new BreadcrumbManager().GetBreadcrumbs(
                     userItems,
-                    currentItem.ParentId
+                    rootItem.ParentId
                 );
             }
 
-            // convert List<TodoItem> to TodoList (nested structure that more
-            // closely maps to what the frontend displays)
+            // convert List<TodoItem> to TodoList.
+            // TodoList is a ViewModel that more closely maps
+            // to the concept of what's displayed in the frontend.
             foreach (TodoItem parent in parents)
             {
+                // gather children
                 List<TodoItem> children = userItems.Where(i => i.ParentId == parent.Id).ToList();
                 List<TodoChild> sublist = new();
 
@@ -71,6 +101,7 @@ namespace dwindlist.Models.EntityManager
                     );
                 }
 
+                // put into list
                 todoList.Items.Add(
                     new TodoParent
                     {
@@ -136,9 +167,34 @@ namespace dwindlist.Models.EntityManager
         /// <param name="userId">Whose list to add the new <see cref="TodoItem">item</see> to.</param>
         /// <param name="parentId">The parent of which the item will be added to.</param>
         /// <param name="todoItemDto"><see cref="TodoItemDto">DTO</see> containing the new <see cref="TodoItem">item</see>'s label.</param>
+        /// <exception cref="ItemNotFoundException"/>
+        /// <exception cref="ItemNotOwnedException"/>
+        /// <exception cref="DbUpdateException"/>
         public void AddItem(string userId, int parentId, TodoItemDto todoItemDto)
         {
+            // a flag to disregard some exceptions
+            // 0th item need not exist/have an owner
+            bool topLevel = parentId == 0;
+
             using ApplicationDbContext db = new();
+
+            // the item under which the new item will be added to
+            TodoItem? parentItem = db.TodoItem.FirstOrDefault(
+                i => i.Id == parentId && i.Active == 'a'
+            );
+
+            bool itemExists = parentItem != null;
+            if (!topLevel && !itemExists)
+            {
+                throw new ItemNotFoundException();
+            }
+
+            bool userOwnsItem = parentItem?.UserId == userId;
+            if (!topLevel && !userOwnsItem)
+            {
+                throw new ItemNotOwnedException();
+            }
+
             TodoItem newItem =
                 new()
                 {
@@ -150,13 +206,14 @@ namespace dwindlist.Models.EntityManager
                 };
 
             _ = db.TodoItem.Add(newItem);
+
+            // Update the status of parents
+            // i.e., if it was already marked completed, unmark it
             List<TodoItem> userItems = db.TodoItem
                 .Where(i => i.UserId == userId)
                 .Where(i => i.Active == 'a')
                 .ToList();
 
-            // Update the status of parents
-            // i.e., if it was already marked completed, unmark it
             _ = RecursiveUpdateParentStatus(newItem, userItems);
             _ = db.SaveChanges();
         }
@@ -167,16 +224,34 @@ namespace dwindlist.Models.EntityManager
         /// <param name="userId">Whose list the <see cref="TodoItem">item</see> to be updated belongs to.</param>
         /// <param name="itemId">Id of the <see cref="TodoItem">item</see> to be updated.</param>
         /// <param name="todoItemDto"><see cref="TodoItemDto">DTO</see> containing the <see cref="TodoItem">item</see>'s updated label.</param>
+        /// <exception cref="ItemNotFoundException"/>
+        /// <exception cref="ItemNotOwnedException"/>
+        /// <exception cref="DbUpdateException"/>
         public void UpdateItemLabel(string userId, int itemId, TodoItemDto todoItemDto)
         {
             using ApplicationDbContext db = new();
-            IQueryable<TodoItem> userItems = db.TodoItem
-                .Where(i => i.UserId == userId)
-                .Where(i => i.Active == 'a');
 
-            TodoItem item = userItems.Single(i => i.Id == itemId);
+            TodoItem? item = db.TodoItem.FirstOrDefault(
+                i => (i.Id == itemId && i.Active == 'a' )
+            );
+
+            bool itemExists = item != null;
+            if (!itemExists)
+            {
+                throw new ItemNotFoundException();
+            }
+
+            bool userOwnsItem = item?.UserId == userId;
+            if (!userOwnsItem)
+            {
+                throw new ItemNotOwnedException();
+            }
+
+            // disable compiler warning
+            // we already checked for null above
+            #pragma warning disable CS8602 // possibly null reference
             item.Label = todoItemDto.Label;
-
+            #pragma warning restore CS8602 // possibly null reference
             _ = db.SaveChanges();
         }
 
@@ -185,15 +260,33 @@ namespace dwindlist.Models.EntityManager
         /// </summary>
         /// <param name="userId">Whose list the <see cref="TodoItem">item</see> to be expanded or collapsed belongs to.</param>
         /// <param name="itemId">Id of the <see cref="TodoItem">item</see> to be expanded or collapsed</param>
+        /// <exception cref="ItemNotFoundException"/>
+        /// <exception cref="ItemNotOwnedException"/>
+        /// <exception cref="DbUpdateException"/>
         public void ToggleItemExpanded(string userId, int itemId)
         {
             using ApplicationDbContext db = new();
-            IQueryable<TodoItem> userItems = db.TodoItem
-                .Where(i => i.UserId == userId)
-                .Where(i => i.Active == 'a');
+            TodoItem? item = db.TodoItem.FirstOrDefault(
+                i => (i.Id == itemId && i.Active == 'a' )
+            );
 
-            TodoItem item = userItems.Single(i => i.Id == itemId);
+            bool itemExists = item != null;
+            if (!itemExists)
+            {
+                throw new ItemNotFoundException();
+            }
+
+            bool userOwnsItem = item?.UserId == userId;
+            if (!userOwnsItem)
+            {
+                throw new ItemNotOwnedException();
+            }
+
+            // disable compiler warning
+            // we already checked for null above
+            #pragma warning disable CS8602 // possibly null reference
             item.Expanded = item.Expanded == 'c' ? 'e' : 'c';
+            #pragma warning restore CS8602 // possibly null reference
 
             _ = db.SaveChanges();
         }
@@ -203,20 +296,45 @@ namespace dwindlist.Models.EntityManager
         /// </summary>
         /// <param name="userId">Whose list the <see cref="TodoItem">item</see> to be toggled complete or incomplete belongs to.</param>
         /// <param name="itemId">Id of the <see cref="TodoItem">item</see> to be toggled complete or incomplete</param>
+        /// <exception cref="ItemNotFoundException"/>
+        /// <exception cref="ItemNotOwnedException"/>
+        /// <exception cref="DbUpdateException"/>
         public bool ToggleItemStatus(string userId, int itemId)
         {
             using ApplicationDbContext db = new();
+            TodoItem? item = db.TodoItem.FirstOrDefault(
+                i => (i.Id == itemId && i.Active == 'a' )
+            );
+
+            bool itemExists = item != null;
+            if (!itemExists)
+            {
+                throw new ItemNotFoundException();
+            }
+
+            bool userOwnsItem = item?.UserId == userId;
+            if (!userOwnsItem)
+            {
+                throw new ItemNotOwnedException();
+            }
+
+            // disable compiler warning
+            // we already checked for null above
+            #pragma warning disable CS8602 // possibly null reference
+            char status = item.Status == 'i' ? 'c' : 'i';
+            #pragma warning restore CS8602 // possibly null reference
+
             List<TodoItem> userItems = db.TodoItem
                 .Where(i => i.UserId == userId)
                 .Where(i => i.Active == 'a')
                 .ToList();
 
-            TodoItem item = userItems.Single(i => i.Id == itemId);
-
-            // Update the status of related items
-            char status = item.Status == 'i' ? 'c' : 'i';
+            // update children
             Recurse(item, userItems, i => i.Status = status);
+
+            // update parents (bool to tell the frontend to update)
             bool shouldUpdateParent = RecursiveUpdateParentStatus(item, userItems);
+
             _ = db.SaveChanges();
             return shouldUpdateParent;
         }
@@ -229,25 +347,46 @@ namespace dwindlist.Models.EntityManager
         /// <remarks>
         /// <see cref="Models.TodoItem">Items</see> are not totally deleted; they are marked with a property that is ignored during queries.
         /// </remarks>
+        /// <exception cref="ItemNotFoundException"/>
+        /// <exception cref="ItemNotOwnedException"/>
+        /// <exception cref="DbUpdateException"/>
         public bool DeleteItem(string userId, int id)
         {
             using ApplicationDbContext db = new();
+            // mark item and its children as deleted
+            TodoItem? item = db.TodoItem.FirstOrDefault(
+                i => (i.Id == id && i.Active == 'a' )
+            );
+
+            bool itemExists = item != null;
+            if (!itemExists)
+            {
+                throw new ItemNotFoundException();
+            }
+
+            bool userOwnsItem = item?.UserId == userId;
+            if (!userOwnsItem)
+            {
+                throw new ItemNotOwnedException();
+            }
+
+            // disable compiler warning
+            // we already checked for null above
+            #pragma warning disable CS8602 // possibly null reference
+            // mark deactivated as complete
+            // updates assume userItems are all active, not deactivated
+            // functionally the same in this context
+            item.Active = 'd';
+            #pragma warning restore CS8602 // possibly null reference
+
+            // Update the status of parents
+            // i.e., if it was the last incomplete item, mark its parent complete
             List<TodoItem> userItems = db.TodoItem
                 .Where(i => i.UserId == userId)
                 .Where(i => i.Active == 'a')
                 .ToList();
 
-            // mark item and its children as deleted
-            TodoItem item = userItems.Single(i => i.Id == id);
             Recurse(item, userItems, i => i.Active = 'd');
-
-            // mark deactivated as complete
-            // updates assume userItems are all active, not deactivated
-            // functionally the same in this context
-            item.Status = 'c';
-
-            // Update the status of parents
-            // i.e., if it was the last incomplete item, mark its parent complete
             bool shouldUpdateParent = RecursiveUpdateParentStatus(item, userItems);
             _ = db.SaveChanges();
             return shouldUpdateParent;
@@ -403,6 +542,28 @@ namespace dwindlist.Models.EntityManager
             // we should check if that parent's parent should also be updated.
             shouldUpdateParent = shouldCompleteParent && initParentStatus == 'i';
             return shouldUpdateParent;
+        }
+    }
+
+    /// <summary>
+    /// The exception that is thrown when attempting to access
+    /// a TodoItem that does not exist within the DbSet or IQueryable
+    /// </summary>
+    public class ItemNotFoundException : ArgumentException
+    {
+        public ItemNotFoundException() : base("Item does not exist.")
+        {
+        }
+    }
+
+    /// <summary>
+    /// The exception that is thrown when a user attempts to access
+    /// a TodoItem that does not belong to them.
+    /// </summary>
+    public class ItemNotOwnedException : ArgumentException
+    {
+        public ItemNotOwnedException() : base("Item is not owned by user.")
+        {
         }
     }
 }

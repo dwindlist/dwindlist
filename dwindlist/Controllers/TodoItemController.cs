@@ -70,11 +70,29 @@ namespace dwindlist.Controllers
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             TodoItemManager todoItemManager = new();
-            TodoList todoList = todoItemManager.GetTodoList(userId, id);
+            TodoList todoList;
+            try
+            {
+                todoList = todoItemManager.GetTodoList(userId, (int)id);
+            }
+            catch (Exception e)
+            {
+                switch (e)
+                {
+                    // redirect to home if trying to access an illegal item
+                    case ItemNotFoundException:
+                    case ItemNotOwnedException:
+                        return Redirect("/");
+                    // otherwise, return internal server error
+                    // TODO: create proper error page
+                    default:
+                        return InternalServerError(e, "An unknown error occurred");
+                }
+            }
 
             return View(todoList);
         }
@@ -99,7 +117,7 @@ namespace dwindlist.Controllers
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             // If no search string is provided, redirect to the top level of the list.
@@ -130,7 +148,7 @@ namespace dwindlist.Controllers
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             TodoItemManager todoItemManager = new();
@@ -155,7 +173,7 @@ namespace dwindlist.Controllers
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             TodoItemManager todoItemManager = new();
@@ -176,14 +194,14 @@ namespace dwindlist.Controllers
         /// </returns>
         [Authorize]
         [HttpPost]
-        public ActionResult Add(int id, [FromBody] TodoItemDto todoItemDto)
+        public ActionResult Add(int? id, [FromBody] TodoItemDto todoItemDto)
         {
             // UserId should never be null because of the [Authorize] decorator,
             // but just for safety, always check anyway.
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             // Reject request to add new item with invalid labels
@@ -192,10 +210,20 @@ namespace dwindlist.Controllers
                 return BadRequest(ModelState);
             }
 
-            TodoItemManager todoItemManager = new();
-            todoItemManager.AddItem(userId, id, todoItemDto);
+            id ??= 0;
 
-            return Ok();
+            TodoItemManager todoItemManager = new();
+            try
+            {
+                todoItemManager.AddItem(userId, (int)id, todoItemDto);
+            }
+            catch (Exception e)
+            {
+                return HandleErrorWithMessage(e, "Failed to add item");
+            }
+
+            const int createdHttpCode = 201;
+            return StatusCode(createdHttpCode);
         }
 
         /// <summary>
@@ -214,11 +242,19 @@ namespace dwindlist.Controllers
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             TodoItemManager todoItemManager = new();
-            bool parentStatus = todoItemManager.ToggleItemStatus(userId, id);
+            bool parentStatus;
+            try
+            {
+                parentStatus = todoItemManager.ToggleItemStatus(userId, id);
+            }
+            catch (Exception e)
+            {
+                return HandleErrorWithMessage(e, "Failed to toggle item status");
+            }
 
             return Ok(parentStatus);
         }
@@ -239,11 +275,19 @@ namespace dwindlist.Controllers
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             TodoItemManager todoItemManager = new();
-            todoItemManager.ToggleItemExpanded(userId, id);
+
+            try
+            {
+                todoItemManager.ToggleItemExpanded(userId, id);
+            }
+            catch (Exception e)
+            {
+                return HandleErrorWithMessage(e, "Failed to expand/collapse item");
+            }
 
             return Ok();
         }
@@ -265,7 +309,7 @@ namespace dwindlist.Controllers
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             // Reject request to update item with invalid label
@@ -275,7 +319,14 @@ namespace dwindlist.Controllers
             }
 
             TodoItemManager todoItemManager = new();
-            todoItemManager.UpdateItemLabel(userId, id, todoItemDto);
+            try
+            {
+                todoItemManager.UpdateItemLabel(userId, id, todoItemDto);
+            }
+            catch (Exception e)
+            {
+                return HandleErrorWithMessage(e, "Failed to update item label");
+            }
 
             return Ok();
         }
@@ -299,13 +350,46 @@ namespace dwindlist.Controllers
             string? userId = GetUserId(User.Identity as ClaimsIdentity);
             if (userId == null)
             {
-                return BadRequest();
+                return HandleNoUserId();
             }
 
             TodoItemManager todoItemManager = new();
-            bool shouldUpdateParent = todoItemManager.DeleteItem(userId, id);
+            bool shouldUpdateParent;
+            try
+            {
+                shouldUpdateParent = todoItemManager.DeleteItem(userId, id);
+            }
+            catch (Exception e)
+            {
+                return HandleErrorWithMessage(e, "Failed to delete item");
+            }
 
             return Ok(shouldUpdateParent);
+        }
+
+        private ActionResult HandleNoUserId()
+        {
+            return Unauthorized("Could not obtain user ID.");
+        }
+
+        private ActionResult InternalServerError(Exception e, string message)
+        {
+            const int internalSeverErrorCode = 500;
+            string errorMessage = message + ": " + e.Message;
+            return StatusCode(internalSeverErrorCode, errorMessage);
+        }
+
+        private ActionResult HandleErrorWithMessage(Exception e, string message)
+        {
+            switch (e)
+            {
+                case ItemNotFoundException:
+                case ItemNotOwnedException:
+                    string errorMessage = message + ": " + e.Message;
+                    return BadRequest(errorMessage);
+                default:
+                    return InternalServerError(e, message);
+            }
         }
     }
 }
