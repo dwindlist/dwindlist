@@ -42,6 +42,7 @@ namespace dwindlist.Models.EntityManager
                 i => (i.Id == rootId && i.Active == 'a')
             );
 
+            // prevent illegal access
             bool itemExists = rootItem != null;
             if (!topLevel && !itemExists)
             {
@@ -183,6 +184,7 @@ namespace dwindlist.Models.EntityManager
                 i => i.Id == parentId && i.Active == 'a'
             );
 
+            // prevent illegal access
             bool itemExists = parentItem != null;
             if (!topLevel && !itemExists)
             {
@@ -195,6 +197,7 @@ namespace dwindlist.Models.EntityManager
                 throw new ItemNotOwnedException();
             }
 
+            // add new item
             TodoItem newItem =
                 new()
                 {
@@ -214,6 +217,8 @@ namespace dwindlist.Models.EntityManager
                 .Where(i => i.Active == 'a')
                 .ToList();
 
+            // frontend refreshes upon successful add,
+            // no need to tell it to update
             _ = RecursiveUpdateParentStatus(newItem, userItems);
             _ = db.SaveChanges();
         }
@@ -235,6 +240,7 @@ namespace dwindlist.Models.EntityManager
                 i => (i.Id == itemId && i.Active == 'a' )
             );
 
+            // prevent illegal access
             bool itemExists = item != null;
             if (!itemExists)
             {
@@ -250,6 +256,7 @@ namespace dwindlist.Models.EntityManager
             // disable compiler warning
             // we already checked for null above
             #pragma warning disable CS8602 // possibly null reference
+            // update label
             item.Label = todoItemDto.Label;
             #pragma warning restore CS8602 // possibly null reference
             _ = db.SaveChanges();
@@ -270,6 +277,7 @@ namespace dwindlist.Models.EntityManager
                 i => (i.Id == itemId && i.Active == 'a' )
             );
 
+            // prevent illegal access
             bool itemExists = item != null;
             if (!itemExists)
             {
@@ -285,6 +293,7 @@ namespace dwindlist.Models.EntityManager
             // disable compiler warning
             // we already checked for null above
             #pragma warning disable CS8602 // possibly null reference
+            // expand/collapse item
             item.Expanded = item.Expanded == 'c' ? 'e' : 'c';
             #pragma warning restore CS8602 // possibly null reference
 
@@ -306,6 +315,7 @@ namespace dwindlist.Models.EntityManager
                 i => (i.Id == itemId && i.Active == 'a' )
             );
 
+            // prevent illegal access
             bool itemExists = item != null;
             if (!itemExists)
             {
@@ -321,6 +331,7 @@ namespace dwindlist.Models.EntityManager
             // disable compiler warning
             // we already checked for null above
             #pragma warning disable CS8602 // possibly null reference
+            // toggle status
             char status = item.Status == 'i' ? 'c' : 'i';
             #pragma warning restore CS8602 // possibly null reference
 
@@ -332,11 +343,17 @@ namespace dwindlist.Models.EntityManager
             // update children
             Recurse(item, userItems, i => i.Status = status);
 
-            // update parents (bool to tell the frontend to update)
-            bool shouldUpdateParent = RecursiveUpdateParentStatus(item, userItems);
+            // tell frontend to update
+            bool updateFrontend;
+
+            // update parents.
+            // function returns whether anything changed.
+            // if it did, the frontend should change too.
+            updateFrontend = RecursiveUpdateParentStatus(item, userItems);
 
             _ = db.SaveChanges();
-            return shouldUpdateParent;
+
+            return updateFrontend;
         }
 
         /// <summary>
@@ -358,6 +375,7 @@ namespace dwindlist.Models.EntityManager
                 i => (i.Id == id && i.Active == 'a' )
             );
 
+            // prevent illegal access
             bool itemExists = item != null;
             if (!itemExists)
             {
@@ -373,23 +391,31 @@ namespace dwindlist.Models.EntityManager
             // disable compiler warning
             // we already checked for null above
             #pragma warning disable CS8602 // possibly null reference
-            // mark deactivated as complete
-            // updates assume userItems are all active, not deactivated
-            // functionally the same in this context
+            // delete item
             item.Active = 'd';
             #pragma warning restore CS8602 // possibly null reference
 
-            // Update the status of parents
-            // i.e., if it was the last incomplete item, mark its parent complete
+            // Update the status of related items
             List<TodoItem> userItems = db.TodoItem
                 .Where(i => i.UserId == userId)
                 .Where(i => i.Active == 'a')
                 .ToList();
 
+            // children (delete all children)
             Recurse(item, userItems, i => i.Active = 'd');
-            bool shouldUpdateParent = RecursiveUpdateParentStatus(item, userItems);
+
+            // tell frontend to update
+            bool updateFrontend;
+
+            // parents (i.e., if it was the last unchecked item
+            // under its parent, check the parent).
+            // function returns whether anything changed.
+            // if it did, the frontend should change too.
+            updateFrontend = RecursiveUpdateParentStatus(item, userItems);
+
             _ = db.SaveChanges();
-            return shouldUpdateParent;
+
+            return updateFrontend;
         }
 
         /// <summary>
@@ -459,9 +485,13 @@ namespace dwindlist.Models.EntityManager
         /// </summary>
         /// <param name="item">The <see cref="TodoItem"/> whose ancestors should be updated.</param>
         /// <param name="userItems">The list of all <see cref="TodoItem"/>s belonging to the user</param>
+        /// <returns>
+        /// Whether the first parent's status was changed.
+        /// </returns>
         private static bool RecursiveUpdateParentStatus(TodoItem item, List<TodoItem> userItems)
         {
             // Because we'll recurse, we need to get the return value now.
+            // function returns where the parent was changed
             bool val = UpdateParentStatus(item, userItems);
 
             // Don't bother if this is a top level item.
@@ -470,15 +500,22 @@ namespace dwindlist.Models.EntityManager
                 return val;
             }
 
-            // Loop up the ancestors as needed
+            // Loop up the ancestors as needed.
+            // No need for SingleOrDefault, this is a private function;
+            // public functions that call this already handle exceptions that
+            // would lead to this.
             TodoItem currentItem = userItems.Single(i => i.Id == item.ParentId);
-            bool shouldUpdateParent = true;
-            while (shouldUpdateParent && currentItem.ParentId > 0)
-            {
-                shouldUpdateParent = UpdateParentStatus(currentItem, userItems);
 
-                // If updates are no longer needed, or we've reached the top, stop
-                if (!shouldUpdateParent || currentItem.ParentId == 0)
+            // flag to know if we should stop going up the list of parents
+            bool parentWasUpdated = true;
+            while (parentWasUpdated && currentItem.ParentId > 0)
+            {
+                parentWasUpdated = UpdateParentStatus(currentItem, userItems);
+
+                // If updates are no longer needed (parent didn't change)
+                // or we've reached the top, stop
+                bool atTop = currentItem.ParentId == 0;
+                if (!parentWasUpdated || atTop)
                 {
                     break;
                 }
@@ -494,15 +531,18 @@ namespace dwindlist.Models.EntityManager
         /// </summary>
         /// <param name="item">The <see cref="TodoItem"/> whose parent should be updated.</param>
         /// <param name="userItems">The list of all <see cref="TodoItem"/>s belonging to the user</param>
+        /// <returns>
+        /// Whether the parent's status was changed.
+        /// </returns>
         private static bool UpdateParentStatus(TodoItem item, List<TodoItem> userItems)
         {
-            // A flag that we'll toggle if changing this item should change the parent
-            bool shouldUpdateParent = false;
+            // keep track of if we actually do change the parent
+            bool parentWasUpdated = false;
 
             // Don't bother if this is a top level item.
             if (item.ParentId == 0)
             {
-                return shouldUpdateParent;
+                return parentWasUpdated;
             }
 
             // Save this for checking if we actually did toggle
@@ -513,35 +553,33 @@ namespace dwindlist.Models.EntityManager
             if (item.Status == 'i')
             {
                 parent.Status = 'i';
-                shouldUpdateParent = item.Status != initParentStatus;
-                return shouldUpdateParent;
+
+                // if parent changed, tell the caller
+                parentWasUpdated = item.Status != initParentStatus;
+                return parentWasUpdated;
             }
 
             // Complete parent if all children are complete
             List<TodoItem> children = userItems.Where(i => i.ParentId == item.ParentId).ToList();
 
             // Assume all children are complete
-            bool shouldCompleteParent = true;
+            bool allChildenChecked = true;
             foreach (TodoItem child in children)
             {
                 // Toggle when assumption is wrong
                 if (child.Status == 'i')
                 {
-                    shouldCompleteParent = false;
+                    allChildenChecked = false;
                     break;
                 }
             }
 
             // Complete parent if needed
-            if (shouldCompleteParent)
-            {
-                parent.Status = 'c';
-            }
+            parent.Status = allChildenChecked ? 'c' : parent.Status;
 
-            // If we actually did change the parent,
-            // we should check if that parent's parent should also be updated.
-            shouldUpdateParent = shouldCompleteParent && initParentStatus == 'i';
-            return shouldUpdateParent;
+            // if parent changed, tell the caller
+            parentWasUpdated = parent.Status != initParentStatus;
+            return parentWasUpdated;
         }
     }
 

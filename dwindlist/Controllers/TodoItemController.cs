@@ -189,7 +189,7 @@ namespace dwindlist.Controllers
         /// <param name="id">The parent of which the item will be added to.</param>
         /// <param name="todoItemDto"><see cref="TodoItemDto">DTO</see> containing the new <see cref="Models.TodoItem">item</see>'s label.</param>
         /// <returns>
-        /// Ok status on success; otherwise, returns bad request
+        /// Created HTTP status on success; otherwise, returns bad request
         /// (i.e., invalid model state).
         /// </returns>
         [Authorize]
@@ -231,7 +231,7 @@ namespace dwindlist.Controllers
         /// </summary>
         /// <param name="id">Id of the <see cref="Models.TodoItem">item</see> to be toggled complete or incomplete</param>
         /// <returns>
-        /// An HTTP status. On success, also returns a boolean representing whether the parent should toggle.
+        /// An HTTP status. On success, also returns a boolean representing whether the frontend should update.
         /// </returns>
         [Authorize]
         [HttpPut]
@@ -245,18 +245,20 @@ namespace dwindlist.Controllers
                 return HandleNoUserId();
             }
 
+            // tell frontend to update
+            bool updateFrontend;
+
             TodoItemManager todoItemManager = new();
-            bool parentStatus;
             try
             {
-                parentStatus = todoItemManager.ToggleItemStatus(userId, id);
+                updateFrontend = todoItemManager.ToggleItemStatus(userId, id);
             }
             catch (Exception e)
             {
                 return HandleErrorWithMessage(e, "Failed to toggle item status");
             }
 
-            return Ok(parentStatus);
+            return Ok(updateFrontend);
         }
 
         /// <summary>
@@ -336,7 +338,7 @@ namespace dwindlist.Controllers
         /// </summary>
         /// <param name="id">Id of the <see cref="Models.TodoItem">item</see> to be deleted.</param>
         /// <returns>
-        /// An HTTP status. On success, also returns a boolean representing whether the parent should toggle.
+        /// An HTTP status. On success, also returns a boolean representing whether the frontend should update.
         /// </returns>
         /// <remarks>
         /// <see cref="Models.TodoItem">Items</see> are not totally deleted; they are marked with a property that is ignored during queries.
@@ -353,25 +355,41 @@ namespace dwindlist.Controllers
                 return HandleNoUserId();
             }
 
+            // tell frontend to update
+            bool updateFrontend;
+
             TodoItemManager todoItemManager = new();
-            bool shouldUpdateParent;
             try
             {
-                shouldUpdateParent = todoItemManager.DeleteItem(userId, id);
+                updateFrontend = todoItemManager.DeleteItem(userId, id);
             }
             catch (Exception e)
             {
                 return HandleErrorWithMessage(e, "Failed to delete item");
             }
 
-            return Ok(shouldUpdateParent);
+            return Ok(updateFrontend);
         }
 
+        /// <summary>
+        /// Unauthorized wrapper for custom message.
+        /// </summary>
+        /// <returns>
+        /// <see cref="Unauthorized"/> status with custom message.
+        /// </returns>
         private ActionResult HandleNoUserId()
         {
             return Unauthorized("Could not obtain user ID.");
         }
 
+        /// <summary>
+        /// StatusCode wrapper for Internal Server Error HTTP status.
+        /// </summary>
+        /// <param name="e">Exception that was caught</param>
+        /// <param name="message">Custom message to be prepended to error message.</param>
+        /// <returns>
+        /// <see cref="StatusCodeResult"/> return value.
+        /// </returns>
         private ActionResult InternalServerError(Exception e, string message)
         {
             const int internalSeverErrorCode = 500;
@@ -379,6 +397,14 @@ namespace dwindlist.Controllers
             return StatusCode(internalSeverErrorCode, errorMessage);
         }
 
+        /// <summary>
+        /// Handler for common error handling logic.
+        /// </summary>
+        /// <param name="e">Exception that was caught</param>
+        /// <param name="message">Custom message to be prepended to error message.</param>
+        /// <returns>
+        /// <see cref="BadRequestObjectResult"/> or <see cref="StatusCodeResult"/>.
+        /// </returns>
         private ActionResult HandleErrorWithMessage(Exception e, string message)
         {
             switch (e)
