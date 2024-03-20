@@ -2,6 +2,8 @@
 
 A to-do list webapp that encourages breaking down tasks.
 
+![demo screenshot](assets/screenshot.png)
+
 Note: I'm still learning Git, so I might've accidentally duped some commits. Oops.
 
 ## Why?
